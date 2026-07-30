@@ -223,7 +223,10 @@
   }
   .type-individual{background:#E9F8FF;color:#0C8FBF;}
   .type-team{background:#FFF1E0;color:#B4720B;}
-  .p-goal{font-size:13px;font-weight:500;color:var(--sub);margin:8px 0 14px;min-height:34px;}
+  .p-goal{
+    font-size:13px;font-weight:500;color:var(--sub);margin:8px 0 14px;min-height:34px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
   .p-bar-track{height:8px;border-radius:999px;background:#F0F0F7;overflow:hidden;margin-bottom:6px;}
   .p-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--sky));}
   .p-bottom{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--sub);}
@@ -243,7 +246,11 @@
   .g-card:hover{box-shadow:0 12px 26px rgba(34,34,59,.1);transform:translateY(-3px);}
   .g-thumb{
     height:130px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;position:relative;
+    overflow:hidden;
   }
+  .g-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .g-thumb.pdf{font-size:15px;font-weight:800;gap:6px;flex-direction:column;}
+  .g-thumb.pdf .pdf-ic{font-size:30px;}
   .g-thumb .heart{
     position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
     background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;
@@ -298,6 +305,22 @@
     font-size:14px;font-family:inherit;background:#fff;color:var(--ink);
   }
   .apply-form input[type=text]:focus{outline:none;border-color:var(--violet);}
+  .apply-form textarea{
+    padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink);resize:vertical;min-height:64px;box-sizing:border-box;
+  }
+  .apply-form textarea:focus{outline:none;border-color:var(--violet);}
+  #upload-form input[type=text], #upload-form textarea{
+    padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink);width:100%;box-sizing:border-box;resize:vertical;
+  }
+  #upload-form textarea{min-height:72px;}
+  #upload-form input[type=text]:focus, #upload-form textarea:focus{outline:none;border-color:var(--violet);}
+  #upload-form input[type=file]{font-size:12.5px;color:var(--sub);font-family:inherit;}
+  #upload-preview{margin-top:4px;}
+  #upload-preview img{max-height:150px;border-radius:var(--radius-sm);display:block;border:1px solid var(--line);}
+  #upload-preview .pf{font-size:12.5px;color:var(--sub);font-weight:600;background:#F4F1FF;color:var(--violet);
+    display:inline-block;padding:6px 12px;border-radius:999px;}
   .seg{display:flex;gap:8px;}
   .seg-btn{
     flex:1;padding:9px;border-radius:999px;border:1.5px solid var(--line);
@@ -319,6 +342,10 @@
   }
   .roster-row .r-name{font-weight:700;}
   .roster-row .r-team{color:var(--sub);font-size:12px;}
+  .roster-row .r-goal{
+    color:var(--violet);font-size:11.5px;font-weight:600;margin-top:2px;
+    max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
   .roster-row .r-type{
     margin-left:auto;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;flex-shrink:0;
   }
@@ -351,9 +378,12 @@
     cursor:pointer;z-index:2;
   }
   .modal-hero{
-    height:180px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;
-    display:flex;align-items:center;justify-content:center;font-size:48px;color:#fff;
+    height:220px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    display:flex;align-items:center;justify-content:center;font-size:48px;color:#fff;overflow:hidden;
   }
+  .modal-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  .modal-hero.pdf{font-size:17px;font-weight:800;gap:8px;flex-direction:column;}
+  .modal-hero.pdf .pdf-ic{font-size:40px;}
   .modal-body{padding:24px 28px 0;}
   .modal-tag{font-size:11.5px;font-weight:800;color:var(--violet);display:block;margin-bottom:8px;}
   .modal-title{font-size:20px;font-weight:800;margin:0 0 10px;}
@@ -436,7 +466,7 @@
     </nav>
     <div class="nav-cta" id="nav-cta">
       <a href="#" class="btn btn-ghost btn-sm" id="login-btn">Google로 로그인</a>
-      <a href="#" class="btn btn-primary btn-sm">결과물 올리기</a>
+      <a href="#" class="btn btn-primary btn-sm" id="nav-upload-btn">결과물 올리기</a>
     </div>
   </div>
 </header>
@@ -570,6 +600,10 @@
             <label class="field-label" for="apply-team">공모전 팀명</label>
             <input type="text" id="apply-team" placeholder="예: AI드림팀">
           </div>
+          <div class="field">
+            <label class="field-label" for="apply-challenge">이번 학기 도전 과제 · 주제</label>
+            <textarea id="apply-challenge" placeholder="예: 반복되는 엑셀 보고서 취합을 자동화하고 싶어요"></textarea>
+          </div>
           <button type="submit" class="btn btn-primary" id="apply-submit">참여 신청하기</button>
           <p class="apply-note" id="apply-msg"></p>
         </div>
@@ -617,6 +651,7 @@
         <h2>결과물 갤러리</h2>
         <p>참가자들이 만든 업무 효율화 서비스를 구경해보세요.</p>
       </div>
+      <a href="#" class="btn btn-primary btn-sm" id="gallery-upload-btn">+ 결과물 올리기</a>
     </div>
     <div class="filter-pills" id="filters">
       <span class="fpill active" data-f="all">전체</span>
@@ -631,6 +666,48 @@
   <div class="modal-box" id="g-modal-box">
     <button type="button" class="modal-close" id="g-modal-close" aria-label="닫기">✕</button>
     <div id="g-modal-content"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="upload-modal-backdrop">
+  <div class="modal-box" id="upload-modal-box" style="max-width:520px;">
+    <button type="button" class="modal-close" id="upload-modal-close" aria-label="닫기">✕</button>
+    <div class="modal-body" style="padding:28px 28px 4px;">
+      <span class="modal-tag">UPLOAD</span>
+      <h3 class="modal-title" style="margin-bottom:6px;">결과물 올리기</h3>
+      <p class="modal-desc" style="margin-bottom:18px;">링크를 붙여넣거나, 이미지·GIF·PDF 파일을 첨부해서 갤러리에 공유해보세요.</p>
+
+      <div class="apply-gate" id="upload-gate" style="display:none;padding:10px 10px 22px;">
+        <p>결과물을 올리려면 먼저 Google 계정으로 로그인해주세요.</p>
+        <div id="g_id_signin_upload"></div>
+      </div>
+
+      <form id="upload-form" style="display:none;flex-direction:column;gap:14px;padding-bottom:24px;">
+        <div class="field">
+          <label class="field-label" for="upload-title">제목</label>
+          <input type="text" id="upload-title" placeholder="예: 엑셀 보고서 자동화 봇" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="upload-tag">카테고리 태그</label>
+          <input type="text" id="upload-tag" placeholder="예: 업무자동화" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="upload-desc">소개</label>
+          <textarea id="upload-desc" rows="3" placeholder="어떤 결과물인지 간단히 소개해주세요" required></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label" for="upload-link">링크 (선택)</label>
+          <input type="text" id="upload-link" placeholder="https://...">
+        </div>
+        <div class="field">
+          <label class="field-label" for="upload-file">파일 첨부 (선택 · 이미지/GIF/PDF · 5MB 이하)</label>
+          <input type="file" id="upload-file" accept="image/png,image/jpeg,image/gif,application/pdf">
+          <div id="upload-preview"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="upload-submit">갤러리에 올리기</button>
+        <p class="apply-note" id="upload-msg"></p>
+      </form>
+    </div>
   </div>
 </div>
 
@@ -679,6 +756,7 @@ function renderRoster(){
       <div>
         <div class="r-name">${p.name}</div>
         <div class="r-team">${p.dept || ''}</div>
+        ${p.challenge ? `<div class="r-goal">🎯 ${p.challenge}</div>` : ''}
       </div>
       <span class="r-type" style="background:${p.contestType==='개인'?'#E9F8FF':'#FFF1E0'};color:${p.contestType==='개인'?'#0C8FBF':'#B4720B'}">${typeLabel}</span>
     </div>
@@ -723,16 +801,18 @@ if(applyForm){
     const nameInput = document.getElementById('apply-name');
     const deptInput = document.getElementById('apply-dept');
     const teamInput = document.getElementById('apply-team');
+    const challengeInput = document.getElementById('apply-challenge');
     const submitBtn = document.getElementById('apply-submit');
     const name = nameInput.value.trim();
     const dept = deptInput.value.trim();
     const team = teamInput.value.trim();
+    const challenge = challengeInput.value.trim();
     if(!name){ msg.style.color = 'var(--coral)'; msg.textContent = '이름을 입력해주세요.'; return; }
     if(!dept){ msg.style.color = 'var(--coral)'; msg.textContent = '소속을 입력해주세요.'; return; }
     if(applyType === '팀' && !team){ msg.style.color = 'var(--coral)'; msg.textContent = '공모전 팀명을 입력해주세요.'; return; }
 
     const isUpdate = rosterData.some(p => p.email === savedUser.email);
-    const entry = { name, dept, contestType: applyType, contestTeam: applyType==='팀' ? team : '', email: savedUser.email };
+    const entry = { name, dept, contestType: applyType, contestTeam: applyType==='팀' ? team : '', challenge, email: savedUser.email };
 
     submitBtn.disabled = true;
     submitBtn.textContent = '저장 중...';
@@ -817,7 +897,7 @@ function renderDashboard(){
         </div>
         <span class="type-badge ${p.contestType==='개인'?'type-individual':'type-team'}">${p.contestType}</span>
       </div>
-      <div class="p-goal">${p.contestType==='팀' && p.contestTeam ? '공모전 팀: '+p.contestTeam : '개인 참가'}</div>
+      <div class="p-goal">${p.challenge ? `🎯 ${p.challenge}` : (p.contestType==='팀' && p.contestTeam ? '공모전 팀: '+p.contestTeam : '개인 참가')}</div>
       <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
       <div class="p-bottom"><span class="stage">${stage}</span><span>${pct}%</span></div>
       ${isMine ? `
@@ -861,26 +941,19 @@ function renderDashboard(){
   }
 }
 
-const gallery = [
-  {id:1, tag:"업무자동화", type:"개인", title:"엑셀 보고서 자동화 봇", author:"김도현", dept:"인사팀", likes:12, color:"#6C5CE7",
-    desc:"매주 반복되는 엑셀 보고서 취합 작업을 파이썬 스크립트로 자동화했어요. 여러 부서에서 올라오는 파일을 한 번에 취합·정리해서 보고서 초안을 만들어줍니다.",
-    link:""},
-  {id:2, tag:"고객지원", type:"개인", title:"문의 자동 분류 시스템", author:"이서연", dept:"총무팀", likes:8, color:"#3AC6F0",
-    desc:"사내 문의 게시판에 올라오는 글을 유형별로 자동 분류하고 담당자에게 배정하는 시스템을 만들고 있어요. 아직 분류 정확도를 개선 중입니다.",
-    link:""},
-  {id:3, tag:"회의생산성", type:"팀", title:"회의록 자동 요약 서비스", author:"박지훈 외 1명", dept:"AI드림팀", likes:24, color:"#00D2A0",
-    desc:"회의 녹음 파일을 업로드하면 요약본과 액션 아이템을 자동으로 정리해주는 서비스예요. 시즌2 공모전에 이미 출품했습니다.",
-    link:""},
-  {id:4, tag:"내부지원", type:"개인", title:"사내 FAQ 챗봇", author:"최민준", dept:"총무팀", likes:5, color:"#FF6F5E",
-    desc:"자주 묻는 질문에 대해 답변해주는 사내용 챗봇 아이디어를 구체화하고 있어요.",
-    link:""},
-  {id:5, tag:"데이터", type:"개인", title:"업무 데이터 시각화 대시보드", author:"정하늘", dept:"경영기획팀", likes:15, color:"#FF6FA5",
-    desc:"흩어져 있는 업무 데이터를 한 화면에서 볼 수 있는 대시보드를 만들고 있어요.",
-    link:""},
-  {id:6, tag:"문서작업", type:"팀", title:"업무일지 자동 생성기", author:"윤도경 외 1명", dept:"업무자동화팀", likes:9, color:"#FFC33C",
-    desc:"하루 업무 내용을 몇 줄만 입력하면 정해진 양식의 업무일지로 정리해주는 도구예요.",
-    link:""},
-];
+let gallery = [];
+
+function loadResultsFromServer(){
+  if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">결과물을 불러오는 중...</p>';
+  return apiGet('results').then(data=>{
+    gallery = Array.isArray(data) ? data : (data.results || []);
+    renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+    if(currentItemId) renderModal();
+  }).catch(err=>{
+    console.error('results load failed', err);
+    if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--coral)">결과물을 불러오지 못했어요. 새로고침 해주세요.</p>';
+  });
+}
 
 let commentsData = [];
 function getComments(item){
@@ -894,18 +967,33 @@ function loadCommentsFromServer(){
   }).catch(err=>console.error('comments load failed', err));
 }
 
+function galleryThumbHtml(g, idx){
+  if(g.thumbUrl){
+    return `<div class="g-thumb"><img src="${g.thumbUrl}" alt="${g.title}" loading="lazy"></div>`;
+  }
+  if(g.fileType === 'application/pdf' && g.fileUrl){
+    return `<div class="g-thumb pdf" style="background:${avatarColor(idx)}"><span class="pdf-ic">📄</span>PDF</div>`;
+  }
+  return `<div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>`;
+}
+
 const gWrap = document.getElementById('g-cards');
 function renderGallery(filter){
   gWrap.innerHTML = '';
-  gallery.filter(g => filter==='all' || g.type===filter).forEach(g=>{
+  const filtered = gallery.filter(g => filter==='all' || g.contestType===filter);
+  if(!filtered.length){
+    gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">아직 등록된 결과물이 없어요. 첫 번째로 올려보세요!</p>';
+    return;
+  }
+  filtered.forEach((g,i)=>{
     const el = document.createElement('div');
     el.className = 'g-card';
     el.innerHTML = `
-      <div class="g-thumb" style="background:${g.color}">✦</div>
+      ${galleryThumbHtml(g, i)}
       <div class="g-body">
         <span class="g-tag">#${g.tag}</span>
         <p class="g-title">${g.title}</p>
-        <div class="g-meta"><span>${g.author}</span><span>♡ ${g.likes} · 💬 ${getComments(g).length}</span></div>
+        <div class="g-meta"><span>${g.author}</span><span>💬 ${getComments(g).length}</span></div>
       </div>
     `;
     el.addEventListener('click', ()=>openGalleryModal(g.id));
@@ -920,6 +1008,7 @@ document.querySelectorAll('.fpill').forEach(btn=>{
     renderGallery(btn.dataset.f);
   });
 });
+loadResultsFromServer();
 loadCommentsFromServer();
 
 /* ---- 결과물 상세 모달 + 댓글 ---- */
@@ -940,25 +1029,38 @@ document.getElementById('g-modal-close').addEventListener('click', closeGalleryM
 modalBackdrop.addEventListener('click', (e)=>{ if(e.target === modalBackdrop) closeGalleryModal(); });
 
 function renderModal(){
-  const item = gallery.find(g => g.id === currentItemId);
+  const idx = gallery.findIndex(g => g.id === currentItemId);
+  const item = gallery[idx];
   if(!item) return;
   const comments = getComments(item);
   const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
 
+  let heroHtml;
+  if(item.thumbUrl){
+    heroHtml = `<div class="modal-hero"><img src="${item.thumbUrl}" alt="${item.title}"></div>`;
+  } else if(item.fileType === 'application/pdf' && item.fileUrl){
+    heroHtml = `<div class="modal-hero pdf" style="background:${avatarColor(idx)}"><span class="pdf-ic">📄</span>PDF 파일</div>`;
+  } else {
+    heroHtml = `<div class="modal-hero" style="background:${avatarColor(idx)}">✦</div>`;
+  }
+
   modalContent.innerHTML = `
-    <div class="modal-hero" style="background:${item.color}">✦</div>
+    ${heroHtml}
     <div class="modal-body">
       <span class="modal-tag">#${item.tag}</span>
       <h3 class="modal-title">${item.title}</h3>
       <div class="modal-meta">
-        <div class="avatar" style="background:${avatarColor(item.id)}">${item.author.slice(-2)}</div>
+        <div class="avatar" style="background:${avatarColor(idx)}">${item.author.slice(-2)}</div>
         <div>
           <div class="m-author">${item.author}</div>
           <div class="m-dept">${item.dept || ''}</div>
         </div>
       </div>
       <p class="modal-desc">${item.desc || ''}</p>
-      ${item.link ? `<a href="${item.link}" target="_blank" class="modal-link">결과물 바로가기 ↗</a>` : ''}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        ${item.link ? `<a href="${item.link}" target="_blank" class="modal-link">결과물 바로가기 ↗</a>` : ''}
+        ${item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="modal-link">첨부파일 보기 ↗</a>` : ''}
+      </div>
     </div>
     <div class="modal-divider"></div>
     <div class="modal-comments">
@@ -1010,6 +1112,124 @@ function renderModal(){
   }
 }
 
+/* ---- 결과물 업로드 ---- */
+const MAX_FILE_MB = 5;
+let uploadFileData = null; // {base64, name, mime}
+
+const uploadModalBackdrop = document.getElementById('upload-modal-backdrop');
+
+function openUploadModal(){
+  const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
+  const gate = document.getElementById('upload-gate');
+  const form = document.getElementById('upload-form');
+  if(savedUser){
+    gate.style.display = 'none';
+    form.style.display = 'flex';
+  } else {
+    gate.style.display = 'flex';
+    form.style.display = 'none';
+    drawGoogleButton('g_id_signin_upload');
+  }
+  uploadModalBackdrop.classList.add('open');
+}
+function closeUploadModal(){
+  uploadModalBackdrop.classList.remove('open');
+}
+document.getElementById('upload-modal-close').addEventListener('click', closeUploadModal);
+uploadModalBackdrop.addEventListener('click', (e)=>{ if(e.target === uploadModalBackdrop) closeUploadModal(); });
+
+// 로그인 상태에 따라 상단 nav-cta의 버튼이 매번 새로 그려지므로 이벤트 위임 방식으로 바인딩
+document.addEventListener('click', (e)=>{
+  const trigger = e.target.closest('#nav-upload-btn, #gallery-upload-btn');
+  if(trigger){
+    e.preventDefault();
+    openUploadModal();
+  }
+});
+
+const uploadFileInput = document.getElementById('upload-file');
+if(uploadFileInput){
+  uploadFileInput.addEventListener('change', ()=>{
+    const file = uploadFileInput.files[0];
+    const preview = document.getElementById('upload-preview');
+    uploadFileData = null;
+    preview.innerHTML = '';
+    if(!file) return;
+    if(file.size > MAX_FILE_MB*1024*1024){
+      preview.innerHTML = `<p style="font-size:12px;color:var(--coral);margin:6px 0 0;">파일이 너무 커요. ${MAX_FILE_MB}MB 이하로 올려주세요.</p>`;
+      uploadFileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const dataUrl = reader.result;
+      const base64 = dataUrl.split(',')[1];
+      uploadFileData = { base64, name: file.name, mime: file.type };
+      if(file.type.indexOf('image/') === 0){
+        preview.innerHTML = `<img src="${dataUrl}" alt="미리보기">`;
+      } else {
+        preview.innerHTML = `<span class="pf">📄 ${file.name}</span>`;
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const uploadForm = document.getElementById('upload-form');
+if(uploadForm){
+  uploadForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
+    const msg = document.getElementById('upload-msg');
+    if(!savedUser){ msg.style.color = 'var(--coral)'; msg.textContent = 'Google 로그인이 필요해요.'; return; }
+
+    const title = document.getElementById('upload-title').value.trim();
+    const tag = document.getElementById('upload-tag').value.trim();
+    const desc = document.getElementById('upload-desc').value.trim();
+    const link = document.getElementById('upload-link').value.trim();
+
+    if(!title || !tag || !desc){ msg.style.color = 'var(--coral)'; msg.textContent = '제목, 카테고리, 소개를 모두 입력해주세요.'; return; }
+    if(!link && !uploadFileData){ msg.style.color = 'var(--coral)'; msg.textContent = '링크 또는 파일 중 하나는 꼭 넣어주세요.'; return; }
+
+    const myEntry = findMyEntry(savedUser.email);
+    const payload = {
+      title, tag, desc, link,
+      email: savedUser.email,
+      name: savedUser.name,
+      dept: myEntry ? myEntry.dept : '',
+      contestType: myEntry ? myEntry.contestType : '개인',
+      fileData: uploadFileData ? uploadFileData.base64 : '',
+      fileName: uploadFileData ? uploadFileData.name : '',
+      fileMime: uploadFileData ? uploadFileData.mime : ''
+    };
+
+    const submitBtn = document.getElementById('upload-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = uploadFileData ? '파일 업로드 중...' : '올리는 중...';
+    msg.style.color = 'var(--sub)';
+    msg.textContent = uploadFileData ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
+
+    apiPost('addResult', payload).then(res=>{
+      gallery = res.results || gallery;
+      renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '갤러리에 올리기';
+      uploadForm.reset();
+      document.getElementById('upload-preview').innerHTML = '';
+      uploadFileData = null;
+      msg.style.color = '#0F9D74';
+      msg.textContent = '등록됐어요! 갤러리에서 확인해보세요.';
+      setTimeout(closeUploadModal, 900);
+    }).catch(err=>{
+      console.error('upload failed', err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = '갤러리에 올리기';
+      msg.style.color = 'var(--coral)';
+      msg.textContent = '업로드에 실패했어요. 파일 용량을 줄이거나 잠시 후 다시 시도해주세요.';
+    });
+  });
+}
+
 /* ---- Google 로그인 ---- */
 const GOOGLE_CLIENT_ID = "1031715139435-94373dn1gufmb3estvrp2am10ftco8ee.apps.googleusercontent.com";
 
@@ -1025,7 +1245,7 @@ function renderUserState(user){
     cta.innerHTML = `
       <div class="user-chip"><img src="${user.picture}" alt="" class="user-avatar"><span class="user-name">${user.name}</span></div>
       <a href="#" class="btn btn-ghost btn-sm" id="logout-btn">로그아웃</a>
-      <a href="#" class="btn btn-primary btn-sm">결과물 올리기</a>
+      <a href="#" class="btn btn-primary btn-sm" id="nav-upload-btn">결과물 올리기</a>
     `;
     document.getElementById('logout-btn').addEventListener('click', (e)=>{
       e.preventDefault();
@@ -1036,7 +1256,7 @@ function renderUserState(user){
   } else {
     cta.innerHTML = `
       <div id="g_id_signin"></div>
-      <a href="#" class="btn btn-primary btn-sm">결과물 올리기</a>
+      <a href="#" class="btn btn-primary btn-sm" id="nav-upload-btn">결과물 올리기</a>
     `;
     drawGoogleButton('g_id_signin');
   }
@@ -1090,6 +1310,7 @@ function refreshApplyGate(user){
   const nameInput = document.getElementById('apply-name');
   const deptInput = document.getElementById('apply-dept');
   const teamInput = document.getElementById('apply-team');
+  const challengeInput = document.getElementById('apply-challenge');
   const submitBtn = document.getElementById('apply-submit');
   const msg = document.getElementById('apply-msg');
   const existing = findMyEntry(user.email);
@@ -1103,6 +1324,7 @@ function refreshApplyGate(user){
     const teamField = document.getElementById('team-field');
     if(teamField) teamField.style.display = applyType === '팀' ? 'flex' : 'none';
     if(teamInput) teamInput.value = existing.contestTeam || '';
+    if(challengeInput) challengeInput.value = existing.challenge || '';
     if(submitBtn) submitBtn.textContent = '신청 내용 수정하기';
     if(msg){ msg.style.color = 'var(--sub)'; msg.textContent = '이미 신청하셨어요. 내용을 바꾸고 다시 제출하면 수정돼요.'; }
   } else {
