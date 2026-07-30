@@ -303,7 +303,7 @@
   }
 
   /* apply / roster */
-  .apply-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+  .apply-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;}
   .apply-form{
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
     padding:24px;display:flex;flex-direction:column;gap:14px;
@@ -349,10 +349,11 @@
   .apply-note{font-size:12.5px;color:#0F9D74;min-height:16px;margin:0;font-weight:600;}
   .roster-card{
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);
-    padding:20px 24px;max-height:420px;overflow-y:auto;
+    padding:20px 24px;display:flex;flex-direction:column;min-height:0;
   }
-  .roster-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;margin-bottom:8px;}
+  .roster-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;margin-bottom:8px;flex-shrink:0;}
   .roster-count{font-family:var(--font-display);color:var(--violet);}
+  .roster-list{flex:1;overflow-y:auto;min-height:0;}
   .roster-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;cursor:pointer;}
   .roster-row:last-child{border-bottom:none;}
   .roster-row .r-avatar{
@@ -491,6 +492,7 @@
     .timeline{grid-template-columns:repeat(2,1fr);}
     .hero p.sub .l2{white-space:normal;}
     .apply-layout{grid-template-columns:1fr;}
+    .roster-card{max-height:320px;}
   }
 
   @media (max-width:640px){
@@ -718,7 +720,7 @@
     <div class="sec-head">
       <div>
         <span class="tag">DASHBOARD</span>
-        <h2>우리 모두의 진행현황</h2>
+        <h2>진행현황</h2>
         <p>8월 1회차부터 11월 4회차까지, 매달 오프라인 모임에 맞춰 본인의 참여 단계를 기록해요.</p>
       </div>
     </div>
@@ -1066,7 +1068,10 @@ if(rosterList){
 const STAGES = ['8월 · 1회차', '9월 · 2회차', '10월 · 3회차', '11월 · 4회차'];
 function stageToPct(stage){
   const idx = STAGES.indexOf(stage);
-  return idx >= 0 ? Math.round(((idx+1)/STAGES.length)*100) : 25;
+  return idx >= 0 ? Math.round(((idx+1)/STAGES.length)*100) : 0;
+}
+function personPct(p){
+  return (typeof p.pct === 'number') ? p.pct : stageToPct(p.stage || '');
 }
 
 const pWrap = document.getElementById('p-cards');
@@ -1076,7 +1081,7 @@ function renderDashboard(){
   const banner = document.getElementById('dash-banner');
 
   // 전체 평균 진행률
-  const pctList = rosterData.map(p => p.pct || stageToPct(p.stage || STAGES[0]));
+  const pctList = rosterData.map(personPct);
   const avg = pctList.length ? Math.round(pctList.reduce((a,b)=>a+b,0) / pctList.length) : 0;
   document.getElementById('overall-pct').textContent = rosterData.length ? avg + '%' : '-';
   document.getElementById('overall-ring').style.background =
@@ -1089,7 +1094,7 @@ function renderDashboard(){
   const stageMini = document.getElementById('stage-mini');
   const circled = ['①','②','③','④','⑤'];
   stageMini.innerHTML = STAGES.map((s,i)=>{
-    const reached = rosterData.some(p => (p.stage || STAGES[0]) === s || STAGES.indexOf(p.stage) > i);
+    const reached = rosterData.some(p => STAGES.indexOf(p.stage) >= i);
     return `<span class="${reached ? 'on' : ''}">${circled[i]} ${s}</span>`;
   }).join('');
 
@@ -1104,8 +1109,9 @@ function renderDashboard(){
     return;
   }
   rosterData.forEach((p,i)=>{
-    const stage = p.stage || STAGES[0];
-    const pct = p.pct || stageToPct(stage);
+    const stage = p.stage || '';
+    const pct = personPct(p);
+    const stageLabel = stage || '시작 전';
     const isMine = savedUser && p.email === savedUser.email;
     const curIdx = STAGES.indexOf(stage);
     const el = document.createElement('div');
@@ -1122,7 +1128,7 @@ function renderDashboard(){
       </div>
       <div class="p-goal">${p.challenge ? `🎯 ${p.challenge}` : (p.contestType==='팀' && p.contestTeam ? '공모전 팀: '+p.contestTeam : '개인 참가')}</div>
       <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
-      <div class="p-bottom"><span class="stage">${stage}</span><span>${pct}%</span></div>
+      <div class="p-bottom"><span class="stage">${stageLabel}</span><span>${pct}%</span></div>
       ${isMine ? `
         <div class="stepper" id="my-stage-stepper">
           ${STAGES.map((s,si)=>{
