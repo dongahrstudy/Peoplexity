@@ -1210,6 +1210,7 @@ if(uploadForm){
     msg.textContent = uploadFileData ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
 
     apiPost('addResult', payload).then(res=>{
+      if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
       gallery = res.results || gallery;
       renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
       submitBtn.disabled = false;
@@ -1225,7 +1226,7 @@ if(uploadForm){
       submitBtn.disabled = false;
       submitBtn.textContent = '갤러리에 올리기';
       msg.style.color = 'var(--coral)';
-      msg.textContent = '업로드에 실패했어요. 파일 용량을 줄이거나 잠시 후 다시 시도해주세요.';
+      msg.textContent = '업로드 실패: ' + (err && err.message ? err.message : '잠시 후 다시 시도해주세요.');
     });
   });
 }
