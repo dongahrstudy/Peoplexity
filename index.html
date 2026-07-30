@@ -476,6 +476,21 @@
   }
   .contest-banner span{font-size:20px;}
 
+  #scroll-top-btn{
+    position:fixed;right:24px;bottom:24px;z-index:70;
+    display:none;align-items:center;gap:6px;
+    padding:11px 16px;border-radius:999px;border:none;cursor:pointer;
+    background:var(--ink);color:#fff;font-family:inherit;font-weight:700;font-size:12.5px;
+    box-shadow:0 10px 24px rgba(34,34,59,.22);
+    opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease,background .2s ease;
+  }
+  #scroll-top-btn.show{display:flex;opacity:1;transform:translateY(0);}
+  #scroll-top-btn:hover{background:var(--violet);}
+  #scroll-top-btn .stb-arrow{font-size:14px;line-height:1;}
+  @media (max-width:640px){
+    #scroll-top-btn{right:16px;bottom:16px;padding:10px 14px;}
+  }
+
   @media (max-width:920px){
     .hamburger{display:block;}
     nav.links{
@@ -747,10 +762,10 @@
     <div class="sec-head">
       <div>
         <span class="tag">GALLERY</span>
-        <h2>결과물 갤러리</h2>
+        <h2>AI활용 결과물 공유</h2>
         <p>참가자들이 만든 업무 효율화 서비스를 구경해보세요.</p>
       </div>
-      <a href="#" class="btn btn-primary btn-sm" id="gallery-upload-btn">+ 결과물 올리기</a>
+      <a href="#" class="btn btn-primary btn-sm" id="gallery-upload-btn">+ 올리기</a>
     </div>
     <div class="filter-pills" id="filters">
       <span class="fpill active" data-f="all">전체</span>
@@ -758,6 +773,9 @@
       <span class="fpill" data-f="팀">팀</span>
     </div>
     <div class="grid-3" id="g-cards"></div>
+    <button type="button" id="scroll-top-btn" aria-label="맨 위로">
+      TOP<span class="stb-arrow">↑</span>
+    </button>
   </div>
 </section>
 
@@ -799,8 +817,8 @@
           <input type="text" id="upload-link" placeholder="https://...">
         </div>
         <div class="field">
-          <label class="field-label" for="upload-file">파일 첨부 (선택 · 이미지/GIF/PDF · 5MB 이하)</label>
-          <input type="file" id="upload-file" accept="image/png,image/jpeg,image/gif,application/pdf">
+          <label class="field-label" for="upload-file">파일 첨부 (선택 · 대부분의 파일 형식 지원 · 20MB 이하)</label>
+          <input type="file" id="upload-file">
           <div id="upload-preview"></div>
         </div>
         <button type="submit" class="btn btn-primary" id="upload-submit">갤러리에 올리기</button>
@@ -1350,7 +1368,7 @@ function renderModal(){
 }
 
 /* ---- 결과물 업로드 ---- */
-const MAX_FILE_MB = 5;
+const MAX_FILE_MB = 20;
 let uploadFileData = null; // {base64, name, mime}
 
 const uploadModalBackdrop = document.getElementById('upload-modal-backdrop');
@@ -1589,6 +1607,21 @@ function initGoogle(attempt){
 }
 
 window.addEventListener('load', ()=>initGoogle());
+
+/* ---- 맨 위로 가기 버튼 ---- */
+(function(){
+  const btn = document.getElementById('scroll-top-btn');
+  if(!btn) return;
+  const toggle = ()=>{
+    if(window.scrollY > 480) btn.classList.add('show');
+    else btn.classList.remove('show');
+  };
+  window.addEventListener('scroll', toggle, { passive: true });
+  toggle();
+  btn.addEventListener('click', ()=>{
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
 </script>
 
 </body>
