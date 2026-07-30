@@ -353,13 +353,15 @@
   }
   .roster-head{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;margin-bottom:8px;}
   .roster-count{font-family:var(--font-display);color:var(--violet);}
-  .roster-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .roster-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;cursor:pointer;}
   .roster-row:last-child{border-bottom:none;}
   .roster-row .r-avatar{
     width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
     color:#fff;font-weight:700;font-size:11px;flex-shrink:0;
   }
+  .roster-row .r-body{min-width:0;}
   .roster-row .r-name{font-weight:700;}
+  .roster-row .r-name:hover{color:var(--violet);text-decoration:underline;}
   .roster-row .r-team{color:var(--sub);font-size:12px;}
   .roster-row .r-goal{
     color:var(--violet);font-size:11.5px;font-weight:600;margin-top:2px;
@@ -368,6 +370,14 @@
   .roster-row .r-type{
     margin-left:auto;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;flex-shrink:0;
   }
+  .roster-row .r-actions{display:flex;gap:4px;flex-shrink:0;}
+  .roster-row .r-action-btn{
+    width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:#fff;
+    color:var(--sub);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .roster-row .r-action-btn:hover{border-color:var(--violet);color:var(--violet);}
+  .roster-row .r-action-btn.r-delete:hover{border-color:var(--coral);color:var(--coral);}
 
   /* comments (used inside gallery detail modal) */
   .post{
@@ -798,6 +808,13 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="roster-modal-backdrop">
+  <div class="modal-box" id="roster-modal-box" style="max-width:480px;">
+    <button type="button" class="modal-close" id="roster-modal-close" aria-label="닫기">✕</button>
+    <div id="roster-modal-content"></div>
+  </div>
+</div>
+
 <footer>
   <div class="fname">Peoplexity</div>
   <div>동아일보 경영지원국 자발적 학습조직 · 시즌 1 (2026년 하반기) · 업무효율화를 위한 AI활용법과 바이브코딩</div>
@@ -852,17 +869,24 @@ function renderRoster(){
     return;
   }
   count.textContent = rosterData.length + '명';
+  const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
   list.innerHTML = rosterData.map((p,i)=>{
     const typeLabel = p.contestType === '팀' ? `팀 참가${p.contestTeam ? ' · '+p.contestTeam : ''}` : '개인 참가';
+    const isMine = !!(savedUser && p.email === savedUser.email);
     return `
-    <div class="roster-row">
+    <div class="roster-row" data-email="${(p.email||'').replace(/"/g,'&quot;')}">
       <div class="r-avatar" style="background:${avatarColor(i)}">${p.name.slice(-2)}</div>
-      <div>
+      <div class="r-body">
         <div class="r-name">${p.name}</div>
         <div class="r-team">${p.dept || ''}</div>
         ${p.challenge ? `<div class="r-goal">🎯 ${p.challenge}</div>` : ''}
       </div>
       <span class="r-type" style="background:${p.contestType==='개인'?'#E9F8FF':'#FFF1E0'};color:${p.contestType==='개인'?'#0C8FBF':'#B4720B'}">${typeLabel}</span>
+      ${isMine ? `
+      <div class="r-actions">
+        <button type="button" class="r-action-btn r-edit" title="수정">✎</button>
+        <button type="button" class="r-action-btn r-delete" title="삭제">🗑</button>
+      </div>` : ''}
     </div>
   `;}).join('');
 }
@@ -928,9 +952,15 @@ if(applyForm){
       renderRoster();
       renderDashboard();
       submitBtn.disabled = false;
-      submitBtn.textContent = '신청 내용 수정하기';
+      submitBtn.textContent = '참여 신청하기';
       msg.style.color = '#0F9D74';
       msg.textContent = isUpdate ? `${name}님, 신청 내용이 수정됐어요!` : `${name}님, 참여 신청이 명단에 등록됐어요!`;
+      // 제출 후 폼은 빈칸으로 초기화 (다시 수정하고 싶으면 명단의 ✎ 버튼으로 불러올 수 있음)
+      applyForm.reset();
+      applyType = '개인';
+      document.querySelectorAll('#apply-seg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.type === '개인'));
+      const teamField = document.getElementById('team-field');
+      if(teamField) teamField.style.display = 'none';
     }).catch(err=>{
       console.error('roster save failed', err);
       submitBtn.disabled = false;
@@ -942,6 +972,95 @@ if(applyForm){
 }
 
 loadRosterFromServer();
+
+/* ---- 명단 수정 / 삭제 / 상세 팝업 ---- */
+function fillApplyFormForEdit(entry){
+  const nameInput = document.getElementById('apply-name');
+  const deptInput = document.getElementById('apply-dept');
+  const teamInput = document.getElementById('apply-team');
+  const challengeInput = document.getElementById('apply-challenge');
+  const submitBtn = document.getElementById('apply-submit');
+  const msg = document.getElementById('apply-msg');
+  if(nameInput) nameInput.value = entry.name || '';
+  if(deptInput) deptInput.value = entry.dept || '';
+  applyType = entry.contestType || '개인';
+  document.querySelectorAll('#apply-seg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.type === applyType));
+  const teamField = document.getElementById('team-field');
+  if(teamField) teamField.style.display = applyType === '팀' ? 'flex' : 'none';
+  if(teamInput) teamInput.value = entry.contestTeam || '';
+  if(challengeInput) challengeInput.value = entry.challenge || '';
+  if(submitBtn) submitBtn.textContent = '신청 내용 수정하기';
+  if(msg){ msg.style.color = 'var(--sub)'; msg.textContent = '내용을 수정하고 다시 제출해주세요.'; }
+  const applySection = document.getElementById('apply');
+  if(applySection) applySection.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+const rosterModalBackdrop = document.getElementById('roster-modal-backdrop');
+const rosterModalContent = document.getElementById('roster-modal-content');
+function openRosterModal(email){
+  const p = rosterData.find(r => r.email === email);
+  if(!p || !rosterModalBackdrop || !rosterModalContent) return;
+  const typeLabel = p.contestType === '팀' ? `팀 참가${p.contestTeam ? ' · '+p.contestTeam : ''}` : '개인 참가';
+  rosterModalContent.innerHTML = `
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag">참여자 정보</span>
+      <h3 class="modal-title" style="margin:0 0 16px;">${p.name}</h3>
+      <div class="field" style="margin-bottom:14px;">
+        <span class="field-label">소속</span>
+        <p style="margin:4px 0 0;font-size:14px;color:var(--ink);">${p.dept || '-'}</p>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <span class="field-label">공모전 참가 방식</span>
+        <p style="margin:4px 0 0;font-size:14px;color:var(--ink);">${typeLabel}</p>
+      </div>
+      <div class="field">
+        <span class="field-label">이번 학기 도전 과제 · 주제</span>
+        <p style="margin:4px 0 0;font-size:14px;color:var(--ink);line-height:1.7;white-space:pre-wrap;word-break:break-word;">${p.challenge ? p.challenge : '아직 작성하지 않았어요.'}</p>
+      </div>
+    </div>
+  `;
+  rosterModalBackdrop.classList.add('open');
+}
+function closeRosterModal(){
+  if(rosterModalBackdrop) rosterModalBackdrop.classList.remove('open');
+}
+const rosterModalClose = document.getElementById('roster-modal-close');
+if(rosterModalClose) rosterModalClose.addEventListener('click', closeRosterModal);
+if(rosterModalBackdrop) rosterModalBackdrop.addEventListener('click', (e)=>{ if(e.target === rosterModalBackdrop) closeRosterModal(); });
+
+const rosterList = document.getElementById('roster-list');
+if(rosterList){
+  rosterList.addEventListener('click', (e)=>{
+    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
+    const editBtn = e.target.closest('.r-edit');
+    if(editBtn){
+      e.stopPropagation();
+      if(!savedUser) return;
+      const mine = rosterData.find(p => p.email === savedUser.email);
+      if(mine) fillApplyFormForEdit(mine);
+      return;
+    }
+    const delBtn = e.target.closest('.r-delete');
+    if(delBtn){
+      e.stopPropagation();
+      if(!savedUser) return;
+      if(!confirm('참여 신청을 삭제할까요? 등록된 진행현황과 신청 정보가 모두 삭제돼요.')) return;
+      delBtn.disabled = true;
+      apiPost('deleteRoster', { email: savedUser.email }).then(res=>{
+        rosterData = res.roster || rosterData.filter(p => p.email !== savedUser.email);
+        renderRoster();
+        renderDashboard();
+      }).catch(err=>{
+        console.error('roster delete failed', err);
+        delBtn.disabled = false;
+        alert('삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+      return;
+    }
+    const row = e.target.closest('.roster-row');
+    if(row && row.dataset.email) openRosterModal(row.dataset.email);
+  });
+}
 
 /* ---- 대시보드 (참여신청 데이터를 그대로 사용) ---- */
 const STAGES = ['8월 · 1회차', '9월 · 2회차', '10월 · 3회차', '11월 · 4회차'];
