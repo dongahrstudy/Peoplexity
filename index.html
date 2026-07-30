@@ -65,7 +65,8 @@
     backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
   }
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;position:relative;}
+  .nav-left{display:flex;align-items:center;gap:6px;}
   .logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:21px;font-family:var(--font-display);letter-spacing:.2px;}
   .logo-mark{height:30px;width:30px;object-fit:contain;display:block;}
   .logo .mark{
@@ -75,6 +76,12 @@
     color:#fff;font-weight:800;font-size:16px;
   }
   .logo .name b{color:var(--violet);}
+  .hamburger{
+    display:none;background:none;border:none;color:var(--ink);cursor:pointer;
+    padding:6px;margin-left:4px;border-radius:8px;
+  }
+  .hamburger svg{width:22px;height:22px;display:block;}
+  .hamburger:hover{background:var(--line);}
   nav.links{display:flex;gap:28px;font-weight:600;font-size:15px;color:var(--sub);}
   nav.links a:hover{color:var(--violet);}
   .nav-cta{display:flex;align-items:center;gap:10px;}
@@ -459,14 +466,35 @@
   .contest-banner span{font-size:20px;}
 
   @media (max-width:920px){
-    nav.links{display:none;}
+    .hamburger{display:block;}
+    nav.links{
+      display:none;position:absolute;top:100%;left:0;right:0;
+      flex-direction:column;gap:0;background:#fff;border-bottom:1px solid var(--line);
+      box-shadow:0 16px 28px rgba(34,34,59,.1);padding:6px 24px 14px;z-index:60;
+    }
+    nav.links.open{display:flex;}
+    nav.links a{padding:12px 4px;border-bottom:1px solid var(--line);}
+    nav.links a:last-child{border-bottom:none;}
     .hero h1{font-size:32px;}
-    .hero-stats{grid-template-columns:repeat(2,1fr);}
     .grid-4{grid-template-columns:repeat(2,1fr);}
     .grid-3{grid-template-columns:1fr;}
     .timeline{grid-template-columns:repeat(2,1fr);}
     .hero p.sub .l2{white-space:normal;}
     .apply-layout{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:640px){
+    .nav-inner{padding:12px 16px;}
+    .user-name{display:none;}
+    .hero{padding:52px 20px 60px;}
+    section{padding:48px 20px;}
+    .sec-head h2{font-size:22px;}
+    .timeline{grid-template-columns:1fr;}
+    .grid-4{grid-template-columns:1fr;}
+    .overall-card{padding:20px;gap:16px;}
+    .stepper{overflow-x:auto;padding-bottom:2px;}
+    .goal-card{padding:18px 20px;}
+    .apply-form, .roster-card{padding:18px;}
   }
 </style>
 </head>
@@ -474,11 +502,16 @@
 
 <header class="nav">
   <div class="nav-inner">
-    <a href="#top" class="logo">
-      <img src="peoplexity-logo.png" alt="" class="logo-mark">
-      <span class="name">People<b>xity</b></span>
-    </a>
-    <nav class="links">
+    <div class="nav-left">
+      <a href="#top" class="logo">
+        <img src="peoplexity-logo.png" alt="" class="logo-mark">
+        <span class="name">People<b>xity</b></span>
+      </a>
+      <button type="button" class="hamburger" id="hamburger-btn" aria-label="메뉴 열기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+      </button>
+    </div>
+    <nav class="links" id="nav-links">
       <a href="#goals">목표</a>
       <a href="#schedule">일정</a>
       <a href="#apply">신청</a>
@@ -771,6 +804,24 @@
 </footer>
 
 <script>
+/* ---- 모바일 햄버거 메뉴 ---- */
+(function(){
+  const btn = document.getElementById('hamburger-btn');
+  const links = document.getElementById('nav-links');
+  if(!btn || !links) return;
+  btn.addEventListener('click', ()=>{
+    links.classList.toggle('open');
+  });
+  links.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click', ()=>links.classList.remove('open'));
+  });
+  document.addEventListener('click', (e)=>{
+    if(links.classList.contains('open') && !links.contains(e.target) && !btn.contains(e.target)){
+      links.classList.remove('open');
+    }
+  });
+})();
+
 const COLORS = ["#6C5CE7","#3AC6F0","#00D2A0","#FF6F5E","#FF6FA5","#FFC33C"];
 function avatarColor(i){return COLORS[i % COLORS.length];}
 
