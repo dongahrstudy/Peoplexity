@@ -248,7 +248,7 @@
     height:130px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;position:relative;
     overflow:hidden;
   }
-  .g-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .g-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
   .g-thumb.pdf{font-size:15px;font-weight:800;gap:6px;flex-direction:column;}
   .g-thumb.pdf .pdf-ic{font-size:30px;}
   .g-thumb .heart{
@@ -380,8 +380,9 @@
   .modal-hero{
     height:220px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;
     display:flex;align-items:center;justify-content:center;font-size:48px;color:#fff;overflow:hidden;
+    position:relative;
   }
-  .modal-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  .modal-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
   .modal-hero.pdf{font-size:17px;font-weight:800;gap:8px;flex-direction:column;}
   .modal-hero.pdf .pdf-ic{font-size:40px;}
   .modal-body{padding:24px 28px 0;}
@@ -969,7 +970,7 @@ function loadCommentsFromServer(){
 
 function galleryThumbHtml(g, idx){
   if(g.thumbUrl){
-    return `<div class="g-thumb"><img src="${g.thumbUrl}" alt="${g.title}" loading="lazy"></div>`;
+    return `<div class="g-thumb" style="background:${avatarColor(idx)}">✦<img src="${g.thumbUrl}" alt="${g.title}" loading="lazy" onerror="this.remove()"></div>`;
   }
   if(g.fileType === 'application/pdf' && g.fileUrl){
     return `<div class="g-thumb pdf" style="background:${avatarColor(idx)}"><span class="pdf-ic">📄</span>PDF</div>`;
@@ -1037,7 +1038,7 @@ function renderModal(){
 
   let heroHtml;
   if(item.thumbUrl){
-    heroHtml = `<div class="modal-hero"><img src="${item.thumbUrl}" alt="${item.title}"></div>`;
+    heroHtml = `<div class="modal-hero" style="background:${avatarColor(idx)}">✦<img src="${item.thumbUrl}" alt="${item.title}" onerror="this.remove()"></div>`;
   } else if(item.fileType === 'application/pdf' && item.fileUrl){
     heroHtml = `<div class="modal-hero pdf" style="background:${avatarColor(idx)}"><span class="pdf-ic">📄</span>PDF 파일</div>`;
   } else {
