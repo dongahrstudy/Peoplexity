@@ -1066,6 +1066,13 @@ if(rosterList){
 
 /* ---- 대시보드 (참여신청 데이터를 그대로 사용) ---- */
 const STAGES = ['8월 · 1회차', '9월 · 2회차', '10월 · 3회차', '11월 · 4회차'];
+// 각 회차가 실제로 시작되는 한국시간(KST, UTC+9) 기준 날짜. 이 시각이 지나야 전체 진행률 배지가 활성화됨.
+const STAGE_DATES = [
+  new Date('2026-08-01T00:00:00+09:00'),
+  new Date('2026-09-01T00:00:00+09:00'),
+  new Date('2026-10-01T00:00:00+09:00'),
+  new Date('2026-11-01T00:00:00+09:00')
+];
 function stageToPct(stage){
   const idx = STAGES.indexOf(stage);
   return idx >= 0 ? Math.round(((idx+1)/STAGES.length)*100) : 0;
@@ -1090,11 +1097,12 @@ function renderDashboard(){
     ? `참여자 ${rosterData.length}명의 평균 진행률은 ${avg}%예요.`
     : '아직 참여 신청이 없어요. 첫 신청자가 되어보세요!';
 
-  // 단계별 배지 (한 명이라도 도달했으면 활성화)
+  // 단계별 배지 (참여자 체크 여부와 무관하게, 실제 해당 회차 시작일이 지나야 활성화)
   const stageMini = document.getElementById('stage-mini');
   const circled = ['①','②','③','④','⑤'];
+  const nowTs = Date.now();
   stageMini.innerHTML = STAGES.map((s,i)=>{
-    const reached = rosterData.some(p => STAGES.indexOf(p.stage) >= i);
+    const reached = nowTs >= STAGE_DATES[i].getTime();
     return `<span class="${reached ? 'on' : ''}">${circled[i]} ${s}</span>`;
   }).join('');
 
@@ -1488,6 +1496,7 @@ function renderUserState(user){
     drawGoogleButton('g_id_signin');
   }
   refreshApplyGate(user);
+  if(typeof renderRoster === 'function') renderRoster();
   if(typeof renderDashboard === 'function') renderDashboard();
 }
 
@@ -1535,27 +1544,21 @@ function refreshApplyGate(user){
   document.getElementById('apply-authed-text').textContent = `${user.name}님 (${user.email})으로 로그인됨`;
 
   const nameInput = document.getElementById('apply-name');
-  const deptInput = document.getElementById('apply-dept');
-  const teamInput = document.getElementById('apply-team');
-  const challengeInput = document.getElementById('apply-challenge');
   const submitBtn = document.getElementById('apply-submit');
   const msg = document.getElementById('apply-msg');
   const existing = findMyEntry(user.email);
 
+  // 로그인해도 폼은 항상 빈칸 상태를 유지 (기존 신청 내용은 명단의 ✎ 버튼을 눌러야만 불러옴)
   if(nameInput && !nameInput.value) nameInput.value = user.name;
-
-  if(existing){
-    if(deptInput) deptInput.value = existing.dept || '';
-    applyType = existing.contestType || '개인';
-    document.querySelectorAll('#apply-seg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.type === applyType));
-    const teamField = document.getElementById('team-field');
-    if(teamField) teamField.style.display = applyType === '팀' ? 'flex' : 'none';
-    if(teamInput) teamInput.value = existing.contestTeam || '';
-    if(challengeInput) challengeInput.value = existing.challenge || '';
-    if(submitBtn) submitBtn.textContent = '신청 내용 수정하기';
-    if(msg){ msg.style.color = 'var(--sub)'; msg.textContent = '이미 신청하셨어요. 내용을 바꾸고 다시 제출하면 수정돼요.'; }
-  } else {
-    if(submitBtn) submitBtn.textContent = '참여 신청하기';
+  if(submitBtn) submitBtn.textContent = '참여 신청하기';
+  if(msg){
+    if(existing){
+      msg.style.color = 'var(--sub)';
+      msg.textContent = '이미 신청하셨어요. 내용을 수정하려면 참여자 명단에서 ✎ 버튼을 눌러주세요.';
+    } else {
+      msg.style.color = 'var(--sub)';
+      msg.textContent = '';
+    }
   }
 }
 
