@@ -991,8 +991,6 @@ if(applyForm){
   });
 }
 
-loadRosterFromServer();
-
 /* ---- 명단 수정 / 삭제 / 상세 팝업 ---- */
 function fillApplyFormForEdit(entry){
   const nameInput = document.getElementById('apply-name');
@@ -1263,8 +1261,29 @@ document.querySelectorAll('.fpill').forEach(btn=>{
     renderGallery(btn.dataset.f);
   });
 });
-loadResultsFromServer();
-loadCommentsFromServer();
+// roster/results/comments를 Apps Script 한 번의 호출로 같이 받아와서
+// 첫 로딩 시 발생하는 Apps Script 실행 왕복 횟수를 3회 → 1회로 줄임
+function loadAllData(){
+  const list = document.getElementById('roster-list');
+  if(list) list.innerHTML = '<p style="font-size:13px;color:var(--sub)">명단을 불러오는 중...</p>';
+  if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">결과물을 불러오는 중...</p>';
+  return apiGet('').then(data=>{
+    rosterData = data.roster || [];
+    commentsData = data.comments || [];
+    gallery = data.results || [];
+    renderRoster();
+    renderDashboard();
+    renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
+    refreshApplyGate(savedUser);
+    if(currentItemId) renderModal();
+  }).catch(err=>{
+    console.error('initial data load failed', err);
+    if(list) list.innerHTML = '<p style="font-size:13px;color:var(--coral)">명단을 불러오지 못했어요. 새로고침 해주세요.</p>';
+    if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--coral)">결과물을 불러오지 못했어요. 새로고침 해주세요.</p>';
+  });
+}
+loadAllData();
 
 /* ---- 결과물 상세 모달 + 댓글 ---- */
 const modalBackdrop = document.getElementById('g-modal-backdrop');
@@ -1606,7 +1625,9 @@ function initGoogle(attempt){
   }
 }
 
-window.addEventListener('load', ()=>initGoogle());
+// window 'load'는 이미지/폰트 등 모든 리소스가 끝날 때까지 기다려서 체감 로그인 속도를 늦추므로,
+// 스크립트가 실행되는 시점(DOM 파싱 완료 시점)에 바로 시작
+initGoogle();
 
 /* ---- 맨 위로 가기 버튼 ---- */
 (function(){
