@@ -1274,6 +1274,31 @@ function myProjects(email){
   return projectsData.filter(p => p.email === email);
 }
 
+// 쓰기 액션 응답이 전체 목록 대신 변경된 항목 하나만 주므로, 로컬 배열에 새로 넣거나(없으면) 교체(있으면)
+function upsertProject(project){
+  if(!project) return;
+  const idx = projectsData.findIndex(p => p.id === project.id);
+  if(idx >= 0) projectsData[idx] = project;
+  else projectsData.push(project);
+}
+function removeProjectLocal(projectId){
+  projectsData = projectsData.filter(p => p.id !== projectId);
+  logsData = logsData.filter(l => l.projectId !== projectId);
+  commentsData = commentsData.filter(c => c.itemId != projectId);
+  likesData = likesData.filter(l => !(l.targetType === '프로젝트' && l.targetId === projectId));
+}
+function upsertArchiveItem(item){
+  if(!item) return;
+  const idx = archiveData.findIndex(a => a.id === item.id);
+  if(idx >= 0) archiveData[idx] = item;
+  else archiveData.unshift(item); // 최신순 정렬이라 새 항목은 맨 앞에
+}
+function removeArchiveItemLocal(archiveId){
+  archiveData = archiveData.filter(a => a.id !== archiveId);
+  commentsData = commentsData.filter(c => c.itemId != archiveId);
+  likesData = likesData.filter(l => !(l.targetType === '아카이브' && l.targetId === archiveId));
+}
+
 /* ---- 좋아요(공감) ---- */
 function getLikeCount(targetType, targetId){
   return likesData.filter(l => l.targetType === targetType && l.targetId === targetId).length;
@@ -1282,6 +1307,13 @@ function isLikedByMe(targetType, targetId){
   const savedUser = getSavedSession();
   if(!savedUser) return false;
   return likesData.some(l => l.targetType === targetType && l.targetId === targetId && l.email === savedUser.email);
+}
+// 좋아요 토글 응답(변경분만 옴)을 로컬 likesData에 반영 (전체 목록을 다시 안 받아도 되게)
+function applyLikeToggle(res){
+  likesData = likesData.filter(l => !(l.targetType === res.targetType && l.targetId === res.targetId && l.email === res.email));
+  if(res.added){
+    likesData.push({ id: 'local-' + Date.now(), targetType: res.targetType, targetId: res.targetId, email: res.email, likedAt: new Date().toISOString() });
+  }
 }
 function likeButtonHtml(targetType, targetId){
   const liked = isLikedByMe(targetType, targetId);
@@ -1299,7 +1331,7 @@ function wireLikeButton(container, onDone){
     btn.disabled = true;
     apiPost('toggleLike', { targetType: btn.dataset.likeType, targetId: btn.dataset.likeId, token: savedUser.token }).then(res=>{
       if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-      likesData = res.likes || likesData;
+      applyLikeToggle(res);
       if(typeof onDone === 'function') onDone();
     }).catch(err=>{
       console.error('toggle like failed', err);
@@ -1588,7 +1620,7 @@ function openArchiveDetail(id){
       submitBtn.textContent = '등록 중...';
       apiPost('addComment', { itemId: item.id, name: savedUser.name, text, token: savedUser.token }).then(res=>{
         if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-        commentsData = res.comments || commentsData;
+        if(res.comment) commentsData.push(res.comment);
         openArchiveDetail(id);
         renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
       }).catch(err=>{
@@ -1606,9 +1638,7 @@ function openArchiveDetail(id){
       if(!confirm(`"${item.title}" 항목을 삭제할까요? 댓글도 함께 삭제돼요.`)) return;
       apiPost('deleteArchiveItem', { id: item.id, token: savedUser.token }).then(res=>{
         if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-        archiveData = res.archive || archiveData;
-        commentsData = res.comments || commentsData;
-        likesData = res.likes || likesData;
+        removeArchiveItemLocal(res.deletedArchiveId || item.id);
         closeArchiveDetail();
         renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
       }).catch(err=>{
@@ -1704,7 +1734,7 @@ document.getElementById('archive-form').addEventListener('submit', (e)=>{
     fileMime: archiveFileData ? archiveFileData.mime : ''
   }).then(res=>{
     if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-    archiveData = res.archive || archiveData;
+    upsertArchiveItem(res.item);
     closeArchiveModal();
     renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
   }).catch(err=>{
@@ -1844,7 +1874,8 @@ function renderModal(){
       submitBtn.disabled = true;
       submitBtn.textContent = '등록 중...';
       apiPost('addComment', { itemId: item.id, name: savedUser.name, text, token: savedUser.token }).then(res=>{
-        commentsData = res.comments || commentsData;
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        if(res.comment) commentsData.push(res.comment);
         renderModal();
         renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
       }).catch(err=>{
@@ -1866,7 +1897,7 @@ function renderModal(){
           const steps = (item.steps||[]).map((s,i)=> i===si ? Object.assign({}, s, {done: cb.checked}) : s);
           apiPost('updateProjectSteps', { projectId: item.id, steps, token: savedUser.token }).then(res=>{
             if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-            projectsData = res.projects || projectsData;
+            upsertProject(res.project);
             renderModal();
             renderDashboard();
             renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
@@ -1896,8 +1927,8 @@ function renderModal(){
         msgEl.style.color = 'var(--sub)'; msgEl.textContent = '';
         apiPost('addProgressLog', { projectId: item.id, content, progress, token: savedUser.token }).then(res=>{
           if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-          projectsData = res.projects || projectsData;
-          logsData = res.logs || logsData;
+          upsertProject(res.project);
+          if(res.log) logsData.push(res.log);
           renderModal();
           renderDashboard();
           renderRoster();
@@ -1921,10 +1952,7 @@ function renderModal(){
       if(!confirm(`"${item.title}" 프로젝트를 삭제할까요? 진행 기록과 댓글도 함께 삭제돼요.`)) return;
       apiPost('deleteProject', { projectId: item.id, token: savedUser.token }).then(res=>{
         if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-        projectsData = res.projects || projectsData;
-        logsData = res.logs || logsData;
-        commentsData = res.comments || commentsData;
-        likesData = res.likes || likesData;
+        removeProjectLocal(res.deletedProjectId || item.id);
         closeGalleryModal();
         renderDashboard();
         renderRoster();
@@ -2013,10 +2041,7 @@ function renderMyPage(user){
       if(!confirm(`"${p.title}" 프로젝트를 삭제할까요? 진행 기록과 댓글도 함께 삭제돼요.`)) return;
       apiPost('deleteProject', { projectId: id, token: user.token }).then(res=>{
         if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-        projectsData = res.projects || projectsData;
-        logsData = res.logs || logsData;
-        commentsData = res.comments || commentsData;
-        likesData = res.likes || likesData;
+        removeProjectLocal(res.deletedProjectId || id);
         renderDashboard();
         renderRoster();
         renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
@@ -2152,15 +2177,14 @@ document.getElementById('project-form').addEventListener('submit', (e)=>{
 
   apiPost(action, payload).then(res=>{
     if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-    projectsData = res.projects || projectsData;
+    upsertProject(res.project);
     closeProjectModal();
     renderDashboard();
     renderRoster();
     renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
     renderMyPage(user);
     if(!editingProjectId){
-      const created = [...projectsData].reverse().find(p=>p.email===user.email && p.title===title);
-      if(created) openGalleryModal(created.id);
+      if(res.project) openGalleryModal(res.project.id);
     } else if(currentItemId === editingProjectId){
       renderModal();
     }
@@ -2495,7 +2519,10 @@ document.getElementById('profile-form').addEventListener('submit', (e)=>{
 
   apiPost('updateProfile', payload).then(res=>{
     if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-    membersData = res.members || membersData;
+    if(res.user){
+      const mi = membersData.findIndex(m => m.email === res.user.email);
+      if(mi >= 0) membersData[mi] = Object.assign({}, membersData[mi], { dept: res.user.dept, photoUrl: res.user.photoUrl });
+    }
     const updatedUser = Object.assign({}, user, res.user);
     saveSession(updatedUser);
     renderUserState(updatedUser);
