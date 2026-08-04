@@ -11,7 +11,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --violet:#6C5CE7;
@@ -88,6 +87,46 @@
   .user-chip{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;background:#F4F3FC;}
   .user-avatar{width:26px;height:26px;border-radius:50%;}
   .user-name{font-size:13.5px;font-weight:700;color:var(--ink);}
+
+  /* 계정 드롭다운 */
+  .acct{position:relative;}
+  .acct-trigger{
+    display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:999px;
+    background:#F4F3FC;border:none;cursor:pointer;font-family:inherit;
+  }
+  .acct-trigger:hover{background:#EAE8FA;}
+  .acct-avatar{
+    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;
+  }
+  .acct-avatar.lg{width:44px;height:44px;font-size:15px;}
+  .acct-trigger-text{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25;}
+  .acct-trigger-name{font-size:13px;font-weight:700;color:var(--ink);}
+  .acct-trigger-dept{font-size:10.5px;color:var(--sub);}
+  .acct-chevron{color:var(--sub);transition:transform .15s ease;flex-shrink:0;}
+  .acct.open .acct-chevron{transform:rotate(180deg);}
+  .acct-dropdown{
+    position:absolute;top:calc(100% + 10px);right:0;width:260px;
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius-md);
+    box-shadow:0 12px 32px rgba(34,34,59,.14);padding:8px;
+    opacity:0;visibility:hidden;transform:translateY(-6px);
+    transition:opacity .15s ease, transform .15s ease, visibility .15s;
+    z-index:60;
+  }
+  .acct.open .acct-dropdown{opacity:1;visibility:visible;transform:translateY(0);}
+  .acct-dropdown-head{display:flex;align-items:center;gap:12px;padding:10px 8px;}
+  .acct-dropdown-name{font-size:15px;font-weight:800;color:var(--ink);}
+  .acct-dropdown-dept{font-size:12.5px;color:var(--sub);margin-top:1px;}
+  .acct-dropdown-divider{height:1px;background:var(--line);margin:4px 0;}
+  .acct-dropdown-row{
+    display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:8px;
+    font-size:13.5px;font-weight:600;color:var(--ink);text-decoration:none;cursor:pointer;
+    background:none;border:none;width:100%;text-align:left;font-family:inherit;
+  }
+  .acct-dropdown-row:hover{background:var(--bg);}
+  .acct-dropdown-row.static{cursor:default;color:var(--sub);}
+  .acct-dropdown-row.static:hover{background:none;}
+  .acct-row-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:6px;
     padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;
@@ -336,10 +375,12 @@
   #upload-form textarea{min-height:72px;}
   #upload-form input[type=text]:focus, #upload-form textarea:focus{outline:none;border-color:var(--violet);}
   #upload-form input[type=file]{font-size:12.5px;color:var(--sub);font-family:inherit;}
-  #upload-preview{margin-top:4px;}
-  #upload-preview img{max-height:150px;border-radius:var(--radius-sm);display:block;border:1px solid var(--line);}
-  #upload-preview .pf{font-size:12.5px;color:var(--sub);font-weight:600;background:#F4F1FF;color:var(--violet);
+  #upload-preview, #project-file-preview{margin-top:4px;}
+  #upload-preview img, #project-file-preview img{max-height:150px;border-radius:var(--radius-sm);display:block;border:1px solid var(--line);}
+  #upload-preview .pf, #project-file-preview .pf{font-size:12.5px;color:var(--sub);font-weight:600;background:#F4F1FF;color:var(--violet);
     display:inline-block;padding:6px 12px;border-radius:999px;}
+  .checkbox-row{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .checkbox-row input[type=checkbox]{accent-color:var(--violet);width:16px;height:16px;}
   .seg{display:flex;gap:8px;}
   .seg-btn{
     flex:1;padding:9px;border-radius:999px;border:1.5px solid var(--line);
@@ -380,6 +421,21 @@
   .roster-row .r-action-btn:hover{border-color:var(--violet);color:var(--violet);}
   .roster-row .r-action-btn.r-delete:hover{border-color:var(--coral);color:var(--coral);}
 
+  /* 참가자 명단 - 가로로 늘어나는 칩 목록 */
+  .participant-strip{display:flex;flex-wrap:wrap;gap:10px;}
+  .participant-chip{
+    display:flex;align-items:center;gap:8px;padding:6px 16px 6px 6px;
+    border-radius:999px;background:var(--bg);border:1px solid var(--line);
+    cursor:pointer;transition:border-color .15s ease;
+  }
+  .participant-chip:hover{border-color:var(--violet);}
+  .participant-chip .p-avatar{
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;
+  }
+  .participant-chip .p-name{font-weight:700;font-size:13px;color:var(--ink);}
+  .participant-chip .p-dept{font-size:12px;color:var(--sub);}
+
   /* comments (used inside gallery detail modal) */
   .post{
     display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);
@@ -388,7 +444,7 @@
   .post .avatar{width:40px;height:40px;font-size:13px;}
   .post-body{flex:1;}
   .post-title{font-weight:700;font-size:14.5px;margin:0 0 4px;}
-  .post-snip{font-size:13px;font-weight:500;color:var(--sub);margin:0 0 8px;}
+  .post-snip{font-size:13px;font-weight:500;color:var(--sub);margin:0 0 8px;white-space:pre-wrap;}
   .post-meta{font-size:12px;color:#9A9AB0;display:flex;gap:12px;align-items:center;}
   .community-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:8px 24px;}
 
@@ -422,11 +478,20 @@
   .modal-meta .avatar{width:32px;height:32px;font-size:12px;}
   .modal-meta .m-author{font-weight:700;font-size:13.5px;}
   .modal-meta .m-dept{font-size:12px;color:var(--sub);}
-  .modal-desc{font-size:14px;color:var(--sub);font-weight:500;line-height:1.7;margin:0 0 18px;}
+  .modal-desc{font-size:14px;color:var(--sub);font-weight:500;line-height:1.7;margin:0 0 18px;white-space:pre-wrap;}
   .modal-link{
     display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;
     color:var(--violet);background:#F4F1FF;padding:8px 16px;border-radius:999px;margin-bottom:24px;
   }
+  .like-btn{
+    display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;
+    color:var(--sub);background:#F7F7F9;border:1.5px solid var(--line);padding:8px 16px;
+    border-radius:999px;margin:0 8px 24px 0;cursor:pointer;transition:transform .12s,background .12s,border-color .12s;
+  }
+  .like-btn:hover{transform:translateY(-1px);}
+  .like-btn.liked{color:#E8467C;background:#FFF0F5;border-color:#FFD1E2;}
+  .like-btn .like-emoji{font-size:15px;line-height:1;}
+  .like-btn:disabled{opacity:.6;cursor:default;transform:none;}
   .modal-divider{border-top:1px solid var(--line);margin:0 28px 20px;}
   .modal-comments{padding:0 28px;}
   .modal-comments h4{font-size:14.5px;font-weight:700;margin:0 0 4px;}
@@ -523,8 +588,108 @@
     .goal-card{padding:18px 20px;}
     .apply-form, .roster-card{padding:18px;}
   }
-</style>
-</head>
+  /* 마이페이지 */
+  .status-divider{height:1px;background:var(--line);margin:40px 0 32px;}
+
+  .mypage-profile-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .mypage-avatar-wrap{position:relative;width:52px;height:52px;flex-shrink:0;}
+  .mypage-avatar-wrap .avatar{width:52px;height:52px;font-size:16px;}
+  .mypage-profile-name{font-size:15px;font-weight:800;color:var(--ink);}
+
+  .mypage-overview{
+    background:linear-gradient(135deg,#F4F1FF,#E9F8FF);
+    border:1px solid var(--line);border-radius:var(--radius-lg);
+    padding:28px 32px;display:flex;align-items:center;gap:36px;flex-wrap:wrap;margin-bottom:32px;
+  }
+  .mypage-stats{display:flex;flex-direction:column;gap:12px;flex:1;min-width:200px;}
+  .mypage-stat{display:flex;align-items:baseline;gap:8px;}
+  .mypage-stat b{font-size:22px;font-family:var(--font-display);font-weight:700;color:var(--ink);}
+  .mypage-stat span{font-size:13.5px;color:var(--sub);font-weight:600;}
+  .mypage-divider{height:1px;background:rgba(34,34,59,.1);width:100%;}
+  .mypage-note{font-size:12.5px;color:var(--sub);margin:0;width:100%;}
+  .mypage-note b{color:var(--ink);}
+
+  .project-card .g-body{display:flex;flex-direction:column;gap:2px;}
+  .project-card .p-bar-track{margin-top:10px;}
+  .project-card .p-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+  .project-card .p-action-btn{
+    flex:1;min-width:70px;padding:7px 8px;border-radius:999px;border:1.5px solid var(--line);
+    background:#fff;color:var(--sub);font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    white-space:nowrap;
+  }
+  .project-card .p-action-btn:hover{border-color:var(--violet);color:var(--violet);}
+  .project-card .p-action-btn.p-delete:hover{border-color:var(--coral);color:var(--coral);}
+
+  .mypage-empty{
+    border:1.5px dashed var(--line);border-radius:var(--radius-lg);
+    padding:48px 20px;text-align:center;color:var(--sub);font-size:13.5px;line-height:1.9;
+    grid-column:1/-1;
+  }
+
+  .stage-picker{display:flex;gap:8px;flex-wrap:wrap;}
+  .stage-picker button{
+    flex:1;min-width:90px;padding:9px;border-radius:999px;border:1.5px solid var(--line);
+    background:#fff;font-weight:700;font-size:12.5px;color:var(--sub);cursor:pointer;font-family:inherit;
+  }
+  .stage-picker button.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .roster-row .r-meta{color:var(--sub);font-size:12px;}
+  .roster-row .r-pct-badge{
+    margin-left:auto;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;flex-shrink:0;
+    background:#F4F1FF;color:var(--violet);
+  }
+
+  @media (max-width:640px){
+    .mypage-overview{padding:20px;gap:18px;}
+  }
+
+  /* 프로젝트 만들기/수정 + 상세 소유자 컨트롤 */
+  select{
+    width:100%;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink);
+  }
+  select:focus{outline:none;border-color:var(--violet);}
+  input[type=range]{width:100%;accent-color:var(--violet);}
+
+  .steps-list{display:flex;flex-direction:column;gap:6px;}
+  .step-row{display:flex;gap:8px;align-items:center;}
+  .step-row input[type=text]{flex:1;}
+  .icon-btn{background:none;border:none;color:var(--sub);cursor:pointer;font-size:15px;padding:4px 6px;}
+  .icon-btn:hover{color:var(--coral);}
+  .add-step{font-size:12.5px;color:var(--violet);background:none;border:none;cursor:pointer;font-weight:700;margin-top:4px;font-family:inherit;}
+
+  .m-checklist{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:8px;}
+  .m-checklist li{display:flex;align-items:center;gap:8px;font-size:13.5px;}
+  .m-checklist input[type=checkbox]{accent-color:var(--violet);}
+  .m-checklist li.done label{text-decoration:line-through;color:var(--sub);}
+
+  .inline-log-form{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;margin-top:10px;}
+  .inline-log-form label{display:block;font-size:12.5px;font-weight:700;margin:10px 0 6px;color:var(--ink);}
+  .inline-log-form label:first-child{margin-top:0;}
+  .owner-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+
+  /* 히어로 미니 진행현황 - 정원(perfect circle) 배지 + 아래 캡션 */
+  .hero-mini-progress{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    margin:16px auto 0;text-decoration:none;color:#fff;
+  }
+  .hero-mini-progress .hmp-ring{
+    position:relative;width:84px;height:84px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 1px rgba(255,255,255,.35);
+    transition:transform .15s ease;
+  }
+  .hero-mini-progress:hover .hmp-ring{transform:scale(1.05);}
+  .hero-mini-progress .hmp-ring .inner{
+    width:66px;height:66px;border-radius:50%;background:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .hero-mini-progress .hmp-ring .inner b{color:var(--coral);font-size:24px;font-weight:800;font-family:var(--font-display);}
+  .hero-mini-progress .hmp-caption{text-align:center;font-size:12px;max-width:300px;}
+  .hero-mini-progress .hmp-caption b{display:block;font-size:13px;}
+  .hero-mini-progress .hmp-caption span{opacity:.85;}
+</style></head>
 <body>
 
 <header class="nav">
@@ -541,16 +706,16 @@
     <nav class="links" id="nav-links">
       <a href="#goals">목표</a>
       <a href="#schedule">일정</a>
-      <a href="#apply">신청</a>
-      <a href="#dashboard">대시보드</a>
-      <a href="#gallery">결과</a>
+      <a href="#roster">참가자</a>
+      <a href="#dashboard">현황</a>
+      <a href="#gallery">프로젝트</a>
+      <a href="#archive">아카이브</a>
     </nav>
     <div class="nav-cta" id="nav-cta">
-      <a href="#" class="btn btn-ghost btn-sm" id="login-btn">Google로 로그인</a>
+      <a href="#" class="btn btn-ghost btn-sm" id="login-btn">참가하기</a>
     </div>
   </div>
 </header>
-
 <section class="hero" id="top">
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
@@ -561,9 +726,20 @@
     <p class="sub"><span class="l2">"파이허브 강의로 AI를 배우고, 바이브코딩을 실무에 적용해 AI활용 사례 공모전에 도전합니다."</span><br><span class="sub-sign">- Peoplexity -</span></p>
     <div class="hero-stats">
       <div class="hstat"><div class="lbl">활동 기간</div><div class="num">4개월</div></div>
-      <div class="hstat"><div class="lbl">공모전 도전 (시즌2·3)</div><div class="num">2회</div></div>
+      <div class="hstat"><div class="lbl">공모전 도전</div><div class="num">2회</div></div>
       <div class="hstat"><div class="lbl">오프라인 모임</div><div class="num">월 1회</div></div>
     </div>
+    <a href="#dashboard" class="hero-mini-progress" id="hero-mini-progress">
+      <div class="hmp-ring" id="hero-mini-ring">
+        <div class="inner">
+          <b id="hero-mini-pct">-</b>
+        </div>
+      </div>
+      <div class="hmp-caption">
+        <b>피플렉시티 전체 진행률</b>
+        <span id="hero-mini-desc">데이터를 불러오는 중...</span>
+      </div>
+    </a>
     <a href="#goals" class="scroll-hint" aria-label="아래로 스크롤">
       <span>SCROLL</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -611,6 +787,7 @@
             <li>2026년 AI활용 사례 공모전(과학기술정보통신부 주관) 시즌3 참가 <span class="goal-deadline">10월 마감</span></li>
             <li>성과 공유 및 마무리 (11월 이후)</li>
           </ul>
+          <a href="https://aichallenge4all.or.kr/competitions/case-contest" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="margin-top:12px;">전국민 AI경진대회 바로가기 ↗</a>
         </div>
       </div>
     </div>
@@ -676,56 +853,17 @@
   </div>
 </section>
 
-<section id="apply">
+<section id="roster">
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <span class="tag">JOIN</span>
-        <h2>참여 신청</h2>
-        <p>Google 계정으로 본인 확인 후, 이름과 소속만 입력하면 참여자 명단에 등록돼요.</p>
+        <span class="tag">MEMBERS</span>
+        <h2>참가자 명단</h2>
+        <p>우측 상단 "참가하기"에서 회사 이메일(@donga.com)로 신청하면 그 자리에서 바로 참가가 완료돼요. 참가자는 현황 섹션에서 프로젝트를 여러 개 등록하고 진행 상황을 기록할 수 있어요.</p>
       </div>
     </div>
-    <div class="apply-layout">
-      <form class="apply-form" id="apply-form">
-        <div class="apply-gate" id="apply-gate">
-          <p>본인 확인을 위해 먼저 Google 계정으로 로그인해주세요.</p>
-          <div id="g_id_signin_apply"></div>
-        </div>
-        <div class="apply-authed" id="apply-authed" style="display:none">
-          <span id="apply-authed-text"></span>
-        </div>
-        <div id="apply-fields" style="display:none;flex-direction:column;gap:14px;">
-          <div class="field">
-            <label class="field-label" for="apply-name">이름</label>
-            <input type="text" id="apply-name" placeholder="예: 김도현" required>
-          </div>
-          <div class="field">
-            <label class="field-label" for="apply-dept">소속</label>
-            <input type="text" id="apply-dept" placeholder="예: 인사팀" required>
-          </div>
-          <div class="field">
-            <span class="field-label">공모전 참가 방식</span>
-            <div class="seg" id="apply-seg">
-              <button type="button" class="seg-btn active" data-type="개인">개인 참가</button>
-              <button type="button" class="seg-btn" data-type="팀">팀 참가</button>
-            </div>
-          </div>
-          <div class="field" id="team-field" style="display:none">
-            <label class="field-label" for="apply-team">공모전 팀명</label>
-            <input type="text" id="apply-team" placeholder="예: AI드림팀">
-          </div>
-          <div class="field">
-            <label class="field-label" for="apply-challenge">이번 학기 도전 과제 · 주제</label>
-            <textarea id="apply-challenge" placeholder="예: 반복되는 엑셀 보고서 취합을 자동화하고 싶어요"></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary" id="apply-submit">참여 신청하기</button>
-          <p class="apply-note" id="apply-msg"></p>
-        </div>
-      </form>
-      <div class="roster-card">
-        <div class="roster-head"><span>참여자 명단</span><span id="roster-count" class="roster-count">0명</span></div>
-        <div class="roster-list" id="roster-list"></div>
-      </div>
+    <div class="roster-card standalone">
+      <div class="participant-strip" id="roster-list"></div>
     </div>
   </div>
 </section>
@@ -734,10 +872,54 @@
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <span class="tag">DASHBOARD</span>
-        <h2>진행현황</h2>
-        <p>8월 1회차부터 11월 4회차까지, 매달 오프라인 모임에 맞춰 본인의 참여 단계를 기록해요.</p>
+        <span class="tag">STATUS</span>
+        <h2>피플렉시티 현황</h2>
+        <p>내가 등록한 프로젝트의 진행 상황과, 참가자 전체의 진행 상황을 한눈에 확인할 수 있어요.</p>
       </div>
+    </div>
+
+    <div class="sec-head" style="margin-bottom:18px;">
+      <div>
+        <h3 style="margin:0;font-size:19px;">내 프로젝트</h3>
+        <p style="margin:4px 0 0;font-size:13px;color:var(--sub);">주제를 정하고 목표와 개발 계획을 세워 진행 상황을 기록해보세요.</p>
+      </div>
+      <a href="#" class="btn btn-primary btn-sm" id="mypage-new-project-btn">+ 새 프로젝트 만들기</a>
+    </div>
+
+    <div class="apply-gate" id="mypage-gate">
+      <p>내 프로젝트 진행현황을 보려면 먼저 로그인해주세요. (회사 이메일 @donga.com)</p>
+      <button type="button" class="btn btn-primary btn-sm" id="mypage-gate-login-btn">참가하기</button>
+    </div>
+
+    <div id="mypage-content" style="display:none;">
+      <div class="mypage-profile-row">
+        <div class="mypage-avatar-wrap">
+          <div class="avatar" id="mypage-avatar" style="overflow:hidden;"></div>
+        </div>
+        <div>
+          <div class="mypage-profile-name" id="mypage-profile-name"></div>
+        </div>
+      </div>
+
+      <div class="mypage-overview">
+        <div class="overall-ring" id="my-ring"><div class="inner"><b id="my-pct">0%</b><span>내 전체 진행률</span></div></div>
+        <div class="mypage-stats">
+          <div class="mypage-stat"><b id="my-project-count">0</b><span>개 진행 중인 프로젝트</span></div>
+          <div class="mypage-stat"><b id="my-log-count">0</b><span>개 누적 진행 기록</span></div>
+          <div class="mypage-stat"><b id="my-last-update">-</b><span>최근 업데이트</span></div>
+        </div>
+        <div class="mypage-divider"></div>
+        <p class="mypage-note">여기서 기록한 진행률의 평균이 바로 아래 <b>Peoplexity 진행현황</b>에 반영돼요.</p>
+      </div>
+
+      <div id="my-project-list" class="grid-3"></div>
+    </div>
+
+    <div class="status-divider"></div>
+
+    <div style="margin-bottom:18px;">
+      <h3 style="margin:0;font-size:19px;">Peoplexity 진행현황</h3>
+      <p style="margin:4px 0 0;font-size:13px;color:var(--sub);">참가자 전체가 등록한 프로젝트의 평균 진행률과 회차별 진행 상황이에요.</p>
     </div>
 
     <div class="overall-card">
@@ -750,10 +932,8 @@
     </div>
 
     <p class="dash-banner" id="dash-banner" style="display:none">
-      아직 참여 신청을 안 하셨네요. <a href="#apply">참여 신청</a>을 하면 여기서 본인 진행현황을 기록할 수 있어요.
+      아직 등록한 프로젝트가 없으시네요. 위 <b>내 프로젝트</b>에서 첫 프로젝트를 만들어보세요.
     </p>
-
-    <div class="grid-4" id="p-cards"></div>
   </div>
 </section>
 
@@ -761,16 +941,18 @@
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <span class="tag">GALLERY</span>
-        <h2>AI활용 결과물 공유</h2>
-        <p>참가자들이 만든 업무 효율화 서비스를 구경해보세요.</p>
+        <span class="tag">PROJECTS</span>
+        <h2>전체 프로젝트 둘러보기</h2>
+        <p>참가자들이 등록한 프로젝트와 진행 상황을 구경해보세요. 프로젝트 생성·관리는 현황 섹션에서 할 수 있어요.</p>
       </div>
-      <a href="#" class="btn btn-primary btn-sm" id="gallery-upload-btn">+ 올리기</a>
+      <a href="#dashboard" class="btn btn-primary btn-sm" id="gallery-new-project-btn">+ 새 프로젝트 만들기</a>
     </div>
     <div class="filter-pills" id="filters">
       <span class="fpill active" data-f="all">전체</span>
-      <span class="fpill" data-f="개인">개인</span>
-      <span class="fpill" data-f="팀">팀</span>
+      <span class="fpill" data-f="업무 효율화를 위한 AI 학습">AI 학습</span>
+      <span class="fpill" data-f="바이브코딩 내재화 및 실무 적용">바이브코딩</span>
+      <span class="fpill" data-f="AI활용 사례 공모전 출품">공모전</span>
+      <span class="fpill" data-f="기타">기타</span>
     </div>
     <div class="grid-3" id="g-cards"></div>
     <button type="button" id="scroll-top-btn" aria-label="맨 위로">
@@ -779,6 +961,70 @@
   </div>
 </section>
 
+<section id="archive">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <span class="tag">ARCHIVE</span>
+        <h2>아카이브</h2>
+        <p>AI·바이브코딩으로 만들었던 프로젝트를 공유하거나, 도움이 됐던 사이트·강좌를 추천해보세요.</p>
+      </div>
+      <a href="#" class="btn btn-primary btn-sm" id="archive-new-btn">+ 아카이브에 올리기</a>
+    </div>
+    <div class="filter-pills" id="archive-filters">
+      <span class="fpill active" data-f="all">전체</span>
+      <span class="fpill" data-f="프로젝트">프로젝트</span>
+      <span class="fpill" data-f="자료">추천</span>
+    </div>
+    <div class="grid-3" id="archive-cards"></div>
+  </div>
+</section>
+
+<div class="modal-backdrop" id="archive-modal-backdrop">
+  <div class="modal-box" id="archive-modal-box" style="max-width:520px;">
+    <button type="button" class="modal-close" id="archive-modal-close" aria-label="닫기">✕</button>
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag">ARCHIVE</span>
+      <h3 class="modal-title" style="margin:0 0 16px;">아카이브에 올리기</h3>
+      <form id="archive-form" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="field">
+          <label class="field-label">유형</label>
+          <select id="archive-type">
+            <option value="프로젝트">프로젝트 공유</option>
+            <option value="자료">추천 사이트/강좌 공유</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="archive-title">제목</label>
+          <input type="text" id="archive-title" placeholder="예: 사내 문의 자동응답 챗봇 / 프롬프트 엔지니어링 강의" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="archive-desc">설명</label>
+          <textarea id="archive-desc" rows="3" placeholder="어떤 프로젝트/자료인지, 왜 추천하는지 적어주세요." style="width:100%;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label" for="archive-link">링크 (선택)</label>
+          <input type="text" id="archive-link" placeholder="예: https://...">
+        </div>
+        <div class="field">
+          <label class="field-label" for="archive-file">파일 첨부 (선택 · 20MB 이하)</label>
+          <input type="file" id="archive-file">
+          <div id="archive-file-preview"></div>
+        </div>
+        <p class="apply-note" id="archive-msg" style="margin-top:2px;"></p>
+        <button type="submit" class="btn btn-primary" id="archive-submit-btn">올리기</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="archive-detail-modal-backdrop">
+  <div class="modal-box" id="archive-detail-modal-box" style="max-width:480px;">
+    <button type="button" class="modal-close" id="archive-detail-modal-close" aria-label="닫기">✕</button>
+    <div id="archive-detail-content"></div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="g-modal-backdrop">
   <div class="modal-box" id="g-modal-box">
     <button type="button" class="modal-close" id="g-modal-close" aria-label="닫기">✕</button>
@@ -786,60 +1032,162 @@
   </div>
 </div>
 
-<div class="modal-backdrop" id="upload-modal-backdrop">
-  <div class="modal-box" id="upload-modal-box" style="max-width:520px;">
-    <button type="button" class="modal-close" id="upload-modal-close" aria-label="닫기">✕</button>
-    <div class="modal-body" style="padding:28px 28px 4px;">
-      <span class="modal-tag">UPLOAD</span>
-      <h3 class="modal-title" style="margin-bottom:6px;">결과물 올리기</h3>
-      <p class="modal-desc" style="margin-bottom:18px;">링크를 붙여넣거나, 이미지·GIF·PDF 파일을 첨부해서 갤러리에 공유해보세요.</p>
+<div class="modal-backdrop" id="roster-modal-backdrop">
+  <div class="modal-box" id="roster-modal-box" style="max-width:520px;">
+    <button type="button" class="modal-close" id="roster-modal-close" aria-label="닫기">✕</button>
+    <div id="roster-modal-content"></div>
+  </div>
+</div>
 
-      <div class="apply-gate" id="upload-gate" style="display:none;padding:10px 10px 22px;">
-        <p>결과물을 올리려면 먼저 Google 계정으로 로그인해주세요.</p>
-        <div id="g_id_signin_upload"></div>
+<div class="modal-backdrop" id="auth-modal-backdrop">
+  <div class="modal-box" id="auth-modal-box" style="max-width:420px;">
+    <button type="button" class="modal-close" id="auth-modal-close" aria-label="닫기">✕</button>
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag">ACCOUNT</span>
+      <h3 class="modal-title" style="margin:0 0 16px;">피플렉시티 참가 신청 / 로그인</h3>
+      <div class="seg" style="margin-bottom:18px;">
+        <button type="button" class="seg-btn active" id="auth-tab-login">로그인</button>
+        <button type="button" class="seg-btn" id="auth-tab-signup">참가 신청</button>
       </div>
 
-      <form id="upload-form" style="display:none;flex-direction:column;gap:14px;padding-bottom:24px;">
+      <form id="auth-login-form" style="display:flex;flex-direction:column;gap:14px;">
         <div class="field">
-          <label class="field-label" for="upload-title">제목</label>
-          <input type="text" id="upload-title" placeholder="예: 엑셀 보고서 자동화 봇" required>
+          <label class="field-label" for="login-email">회사 이메일</label>
+          <input type="email" id="login-email" placeholder="예: hong@donga.com" required>
         </div>
         <div class="field">
-          <label class="field-label" for="upload-tag">카테고리 태그</label>
-          <input type="text" id="upload-tag" placeholder="예: 업무자동화" required>
+          <label class="field-label" for="login-password">비밀번호</label>
+          <input type="password" id="login-password" placeholder="비밀번호" required>
+        </div>
+        <button type="submit" class="btn btn-primary">로그인</button>
+      </form>
+
+      <form id="auth-signup-form" style="display:none;flex-direction:column;gap:14px;">
+        <div class="field">
+          <label class="field-label" for="signup-email">회사 이메일</label>
+          <input type="email" id="signup-email" placeholder="예: hong@donga.com" required>
         </div>
         <div class="field">
-          <label class="field-label" for="upload-desc">소개</label>
-          <textarea id="upload-desc" rows="3" placeholder="어떤 결과물인지 간단히 소개해주세요" required></textarea>
+          <label class="field-label" for="signup-name">이름</label>
+          <input type="text" id="signup-name" placeholder="예: 김도현" required>
         </div>
         <div class="field">
-          <label class="field-label" for="upload-link">링크 (선택)</label>
-          <input type="text" id="upload-link" placeholder="https://...">
+          <label class="field-label" for="signup-phone">연락처</label>
+          <input type="text" id="signup-phone" placeholder="예: 010-1234-5678">
         </div>
         <div class="field">
-          <label class="field-label" for="upload-file">파일 첨부 (선택 · 대부분의 파일 형식 지원 · 20MB 이하)</label>
-          <input type="file" id="upload-file">
-          <div id="upload-preview"></div>
+          <label class="field-label" for="signup-dept">부서명</label>
+          <input type="text" id="signup-dept" placeholder="예: 인사팀" required>
         </div>
-        <button type="submit" class="btn btn-primary" id="upload-submit">갤러리에 올리기</button>
-        <p class="apply-note" id="upload-msg"></p>
+        <div class="field">
+          <label class="field-label" for="signup-photo">프로필 사진 (선택)</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="avatar" id="signup-photo-preview" style="width:44px;height:44px;font-size:14px;overflow:hidden;flex-shrink:0;background:#E3E1F5;color:var(--violet);">＋</div>
+            <input type="file" id="signup-photo" accept="image/*" style="flex:1;">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="signup-password">비밀번호 (8자 이상)</label>
+          <input type="password" id="signup-password" placeholder="비밀번호" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="signup-password2">비밀번호 확인</label>
+          <input type="password" id="signup-password2" placeholder="비밀번호 확인" required>
+        </div>
+        <button type="submit" class="btn btn-primary">참가신청</button>
+      </form>
+
+      <p class="apply-note" id="auth-msg" style="margin-top:6px;"></p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="profile-modal-backdrop">
+  <div class="modal-box" id="profile-modal-box" style="max-width:420px;">
+    <button type="button" class="modal-close" id="profile-modal-close" aria-label="닫기">✕</button>
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag">ACCOUNT</span>
+      <h3 class="modal-title" style="margin:0 0 16px;">개인정보설정</h3>
+      <form id="profile-form" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="field">
+          <label class="field-label" for="profile-photo">프로필 사진</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="avatar" id="profile-photo-preview" style="width:52px;height:52px;font-size:16px;overflow:hidden;flex-shrink:0;background:#E3E1F5;color:var(--violet);"></div>
+            <input type="file" id="profile-photo" accept="image/*" style="flex:1;">
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="profile-phone">연락처</label>
+          <input type="text" id="profile-phone" placeholder="예: 010-1234-5678">
+        </div>
+        <div class="field">
+          <label class="field-label" for="profile-dept">부서명</label>
+          <input type="text" id="profile-dept" placeholder="예: 인사팀">
+        </div>
+        <div class="field">
+          <label class="field-label" for="profile-password">새 비밀번호 <span style="font-weight:500;color:var(--sub);">(변경할 때만 입력 · 8자 이상)</span></label>
+          <input type="password" id="profile-password" placeholder="비밀번호를 바꾸지 않으려면 비워두세요">
+        </div>
+        <div class="field">
+          <label class="field-label" for="profile-password2">새 비밀번호 확인</label>
+          <input type="password" id="profile-password2" placeholder="새 비밀번호 확인">
+        </div>
+        <p class="apply-note" id="profile-msg" style="margin-top:2px;"></p>
+        <button type="submit" class="btn btn-primary" id="profile-submit-btn">저장하기</button>
       </form>
     </div>
   </div>
 </div>
 
-<div class="modal-backdrop" id="roster-modal-backdrop">
-  <div class="modal-box" id="roster-modal-box" style="max-width:480px;">
-    <button type="button" class="modal-close" id="roster-modal-close" aria-label="닫기">✕</button>
-    <div id="roster-modal-content"></div>
+<div class="modal-backdrop" id="project-modal-backdrop">
+  <div class="modal-box" id="project-modal-box" style="max-width:560px;">
+    <button type="button" class="modal-close" id="project-modal-close" aria-label="닫기">✕</button>
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag" id="project-modal-tag">NEW PROJECT</span>
+      <h3 class="modal-title" id="project-modal-title" style="margin:0 0 16px;">새 프로젝트 만들기</h3>
+      <form id="project-form" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="field">
+          <label class="field-label" for="project-title">프로젝트명</label>
+          <input type="text" id="project-title" placeholder="예: 보고서 자동 요약 챗봇 만들기" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="project-topic">주제</label>
+          <select id="project-topic"></select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="project-goal">목표</label>
+          <textarea id="project-goal" rows="3" placeholder="이 프로젝트로 무엇을 이루고 싶은지 적어주세요." style="width:100%;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">개발 계획 <span style="font-weight:500;color:var(--sub);">(단계별로 나눠 적어주세요)</span></label>
+          <div class="steps-list" id="project-steps-list"></div>
+          <button type="button" class="add-step" id="project-add-step-btn">+ 단계 추가</button>
+        </div>
+        <div class="field">
+          <label class="checkbox-row"><input type="checkbox" id="project-completed"> 이미 완료한 프로젝트예요 (진행률 100%로 등록)</label>
+        </div>
+        <div class="field">
+          <label class="field-label" for="project-link">링크 (선택 · 결과물 URL)</label>
+          <input type="text" id="project-link" placeholder="예: https://...">
+        </div>
+        <div class="field">
+          <label class="field-label" for="project-file">파일 첨부 (선택 · 대부분의 파일 형식 지원 · 20MB 이하)</label>
+          <input type="file" id="project-file">
+          <div id="project-file-preview"></div>
+          <p id="project-existing-file-note" style="font-size:12px;color:var(--sub);margin:2px 0 0;display:none;">기존에 첨부된 파일이 있어요. 새 파일을 선택하면 교체돼요.</p>
+        </div>
+        <p class="apply-note" id="project-msg" style="margin-top:2px;"></p>
+        <button type="submit" class="btn btn-primary" id="project-submit-btn">프로젝트 만들기</button>
+      </form>
+    </div>
   </div>
 </div>
 
 <footer>
   <div class="fname">Peoplexity</div>
   <div>동아일보 경영지원국 자발적 학습조직 · 시즌 1 (2026년 하반기) · 업무효율화를 위한 AI활용법과 바이브코딩</div>
+  <div class="footer-note">시즌1 담당자 : 강흠민(인사팀) · 남경희(인재문화팀)</div>
 </footer>
-
 <script>
 /* ---- 모바일 햄버거 메뉴 ---- */
 (function(){
@@ -861,9 +1209,30 @@
 
 const COLORS = ["#6C5CE7","#3AC6F0","#00D2A0","#FF6F5E","#FF6FA5","#FFC33C"];
 function avatarColor(i){return COLORS[i % COLORS.length];}
+// 프로필 사진이 있으면 사진을, 없으면 이름 이니셜을 반환 (아바타 div/span의 내부 콘텐츠로 사용)
+function avatarInner(photoUrl, name){
+  return photoUrl
+    ? `<img src="${photoUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">`
+    : (name||'').slice(-2);
+}
 
-/* ---- 백엔드 연결 (Google Sheet + Apps Script) ---- */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZq-UKw5fyIyw8dh9tI9SdUXVt-YxWzkJesrhtzGuhCd_XgAMNxDSlvVsYXjt4qG3_eQ/exec';
+function formatRelative(iso){
+  if(!iso) return '-';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return '-';
+  const diffMs = Date.now() - d.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if(diffMin < 1) return '방금 전';
+  if(diffMin < 60) return `${diffMin}분 전`;
+  const diffHour = Math.floor(diffMin / 60);
+  if(diffHour < 24) return `${diffHour}시간 전`;
+  const diffDay = Math.floor(diffHour / 24);
+  if(diffDay < 14) return `${diffDay}일 전`;
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* ---- 백엔드 연결 (Apps Script) ---- */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrD07FTte1rX9DXBCXFqU1JXgNNMB5irXy_VBTdqlhj76ikU3t8Q1WZTwf5_Raep0H/exec';
 
 function apiGet(type){
   return fetch(`${APPS_SCRIPT_URL}?type=${type}`).then(r => r.json());
@@ -876,165 +1245,139 @@ function apiPost(action, payload){
   }).then(r => r.json());
 }
 
-/* ---- 참여 신청 / 명단 ---- */
-let rosterData = [];
+/* ---- 시즌 일정 (전체 진행률 배지는 참여자 체크와 무관하게 실제 달력 날짜 기준) ---- */
+const STAGES = ['8월 · 1회차', '9월 · 2회차', '10월 · 3회차', '11월 · 4회차'];
+const STAGE_DATES = [
+  new Date('2026-08-01T00:00:00+09:00'),
+  new Date('2026-09-01T00:00:00+09:00'),
+  new Date('2026-10-01T00:00:00+09:00'),
+  new Date('2026-11-01T00:00:00+09:00')
+];
 
-function renderRoster(){
-  const list = document.getElementById('roster-list');
-  const count = document.getElementById('roster-count');
-  if(!list || !count) return;
-  if(!rosterData.length){
-    count.textContent = '0명';
-    list.innerHTML = '<p style="font-size:13px;color:var(--sub)">아직 신청자가 없어요. 첫 번째로 신청해보세요.</p>';
-    return;
-  }
-  count.textContent = rosterData.length + '명';
-  const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
-  list.innerHTML = rosterData.map((p,i)=>{
-    const typeLabel = p.contestType === '팀' ? `팀 참가${p.contestTeam ? ' · '+p.contestTeam : ''}` : '개인 참가';
-    const isMine = !!(savedUser && p.email === savedUser.email);
-    return `
-    <div class="roster-row" data-email="${(p.email||'').replace(/"/g,'&quot;')}">
-      <div class="r-avatar" style="background:${avatarColor(i)}">${p.name.slice(-2)}</div>
-      <div class="r-body">
-        <div class="r-name">${p.name}</div>
-        <div class="r-team">${p.dept || ''}</div>
-        ${p.challenge ? `<div class="r-goal">🎯 ${p.challenge}</div>` : ''}
-      </div>
-      <span class="r-type" style="background:${p.contestType==='개인'?'#E9F8FF':'#FFF1E0'};color:${p.contestType==='개인'?'#0C8FBF':'#B4720B'}">${typeLabel}</span>
-      ${isMine ? `
-      <div class="r-actions">
-        <button type="button" class="r-action-btn r-edit" title="수정">✎</button>
-        <button type="button" class="r-action-btn r-delete" title="삭제">🗑</button>
-      </div>` : ''}
-    </div>
-  `;}).join('');
+/* ---- 데이터 상태 ---- */
+let membersData = [];
+let projectsData = [];
+let logsData = [];
+let commentsData = [];
+let archiveData = [];
+let archiveTypesData = ['프로젝트', '자료'];
+let likesData = [];
+
+function getComments(projectId){
+  return commentsData.filter(c => c.itemId == projectId);
+}
+function getLogs(projectId){
+  return logsData.filter(l => l.projectId === projectId)
+    .sort((a,b)=> new Date(b.loggedAt) - new Date(a.loggedAt));
+}
+function myProjects(email){
+  return projectsData.filter(p => p.email === email);
 }
 
-function loadRosterFromServer(){
-  const list = document.getElementById('roster-list');
-  if(list) list.innerHTML = '<p style="font-size:13px;color:var(--sub)">명단을 불러오는 중...</p>';
-  return apiGet('roster').then(data=>{
-    rosterData = Array.isArray(data) ? data : (data.roster || []);
+/* ---- 좋아요(공감) ---- */
+function getLikeCount(targetType, targetId){
+  return likesData.filter(l => l.targetType === targetType && l.targetId === targetId).length;
+}
+function isLikedByMe(targetType, targetId){
+  const savedUser = getSavedSession();
+  if(!savedUser) return false;
+  return likesData.some(l => l.targetType === targetType && l.targetId === targetId && l.email === savedUser.email);
+}
+function likeButtonHtml(targetType, targetId){
+  const liked = isLikedByMe(targetType, targetId);
+  const count = getLikeCount(targetType, targetId);
+  return `<button type="button" class="like-btn${liked ? ' liked' : ''}" data-like-type="${targetType}" data-like-id="${targetId}">
+    <span class="like-emoji">${liked ? '❤️' : '🤍'}</span><span class="like-count">${count}</span>
+  </button>`;
+}
+function wireLikeButton(container, onDone){
+  const btn = container.querySelector('.like-btn');
+  if(!btn) return;
+  btn.addEventListener('click', ()=>{
+    const savedUser = getSavedSession();
+    if(!savedUser){ openAuthModal(); return; }
+    btn.disabled = true;
+    apiPost('toggleLike', { targetType: btn.dataset.likeType, targetId: btn.dataset.likeId, token: savedUser.token }).then(res=>{
+      if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+      likesData = res.likes || likesData;
+      if(typeof onDone === 'function') onDone();
+    }).catch(err=>{
+      console.error('toggle like failed', err);
+      alert('처리에 실패했어요. 잠시 후 다시 시도해주세요.');
+    }).finally(()=>{ btn.disabled = false; });
+  });
+}
+
+function loadAllData(){
+  const rosterList = document.getElementById('roster-list');
+  if(rosterList) rosterList.innerHTML = '<p style="font-size:13px;color:var(--sub)">참가자 명단을 불러오는 중...</p>';
+  if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">프로젝트를 불러오는 중...</p>';
+  return apiGet('').then(data=>{
+    membersData = data.members || [];
+    projectsData = data.projects || [];
+    logsData = data.logs || [];
+    commentsData = data.comments || [];
+    archiveData = data.archive || [];
+    likesData = data.likes || [];
+    if(Array.isArray(data.topics) && data.topics.length) topicsData = data.topics;
+    if(Array.isArray(data.archiveTypes) && data.archiveTypes.length) archiveTypesData = data.archiveTypes;
     renderRoster();
     renderDashboard();
-    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
-    refreshApplyGate(savedUser);
+    renderGallery(document.querySelector('#gallery .fpill.active')?.dataset.f || 'all');
+    if(typeof renderArchive === 'function') renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+    if(currentItemId) renderModal();
+    if(typeof renderMyPage === 'function') renderMyPage(getSavedSession());
   }).catch(err=>{
-    console.error('roster load failed', err);
-    if(list) list.innerHTML = '<p style="font-size:13px;color:var(--coral)">명단을 불러오지 못했어요. 새로고침 해주세요.</p>';
+    console.error('initial data load failed', err);
+    if(rosterList) rosterList.innerHTML = '<p style="font-size:13px;color:var(--coral)">명단을 불러오지 못했어요. 새로고침 해주세요.</p>';
+    if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--coral)">프로젝트를 불러오지 못했어요. 새로고침 해주세요.</p>';
   });
 }
 
-let applyType = '개인';
-const segWrap = document.getElementById('apply-seg');
-if(segWrap){
-  segWrap.querySelectorAll('.seg-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      segWrap.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      applyType = btn.dataset.type;
-      document.getElementById('team-field').style.display = applyType === '팀' ? 'flex' : 'none';
-    });
-  });
-}
-
-const applyForm = document.getElementById('apply-form');
-if(applyForm){
-  applyForm.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
-    const msg = document.getElementById('apply-msg');
-    if(!savedUser){ msg.style.color = 'var(--coral)'; msg.textContent = 'Google 로그인이 필요해요.'; return; }
-    const nameInput = document.getElementById('apply-name');
-    const deptInput = document.getElementById('apply-dept');
-    const teamInput = document.getElementById('apply-team');
-    const challengeInput = document.getElementById('apply-challenge');
-    const submitBtn = document.getElementById('apply-submit');
-    const name = nameInput.value.trim();
-    const dept = deptInput.value.trim();
-    const team = teamInput.value.trim();
-    const challenge = challengeInput.value.trim();
-    if(!name){ msg.style.color = 'var(--coral)'; msg.textContent = '이름을 입력해주세요.'; return; }
-    if(!dept){ msg.style.color = 'var(--coral)'; msg.textContent = '소속을 입력해주세요.'; return; }
-    if(applyType === '팀' && !team){ msg.style.color = 'var(--coral)'; msg.textContent = '공모전 팀명을 입력해주세요.'; return; }
-
-    const isUpdate = rosterData.some(p => p.email === savedUser.email);
-    const entry = { name, dept, contestType: applyType, contestTeam: applyType==='팀' ? team : '', challenge, email: savedUser.email };
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = '저장 중...';
-    msg.style.color = 'var(--sub)';
-    msg.textContent = '';
-
-    apiPost('upsertRoster', entry).then(res=>{
-      rosterData = res.roster || rosterData;
-      renderRoster();
-      renderDashboard();
-      submitBtn.disabled = false;
-      submitBtn.textContent = '참여 신청하기';
-      msg.style.color = '#0F9D74';
-      msg.textContent = isUpdate ? `${name}님, 신청 내용이 수정됐어요!` : `${name}님, 참여 신청이 명단에 등록됐어요!`;
-      // 제출 후 폼은 빈칸으로 초기화 (다시 수정하고 싶으면 명단의 ✎ 버튼으로 불러올 수 있음)
-      applyForm.reset();
-      applyType = '개인';
-      document.querySelectorAll('#apply-seg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.type === '개인'));
-      const teamField = document.getElementById('team-field');
-      if(teamField) teamField.style.display = 'none';
-    }).catch(err=>{
-      console.error('roster save failed', err);
-      submitBtn.disabled = false;
-      submitBtn.textContent = isUpdate ? '신청 내용 수정하기' : '참여 신청하기';
-      msg.style.color = 'var(--coral)';
-      msg.textContent = '저장에 실패했어요. 잠시 후 다시 시도해주세요.';
-    });
-  });
-}
-
-/* ---- 명단 수정 / 삭제 / 상세 팝업 ---- */
-function fillApplyFormForEdit(entry){
-  const nameInput = document.getElementById('apply-name');
-  const deptInput = document.getElementById('apply-dept');
-  const teamInput = document.getElementById('apply-team');
-  const challengeInput = document.getElementById('apply-challenge');
-  const submitBtn = document.getElementById('apply-submit');
-  const msg = document.getElementById('apply-msg');
-  if(nameInput) nameInput.value = entry.name || '';
-  if(deptInput) deptInput.value = entry.dept || '';
-  applyType = entry.contestType || '개인';
-  document.querySelectorAll('#apply-seg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.type === applyType));
-  const teamField = document.getElementById('team-field');
-  if(teamField) teamField.style.display = applyType === '팀' ? 'flex' : 'none';
-  if(teamInput) teamInput.value = entry.contestTeam || '';
-  if(challengeInput) challengeInput.value = entry.challenge || '';
-  if(submitBtn) submitBtn.textContent = '신청 내용 수정하기';
-  if(msg){ msg.style.color = 'var(--sub)'; msg.textContent = '내용을 수정하고 다시 제출해주세요.'; }
-  const applySection = document.getElementById('apply');
-  if(applySection) applySection.scrollIntoView({behavior:'smooth', block:'start'});
+/* ---- 참가자 명단 ---- */
+function renderRoster(){
+  const list = document.getElementById('roster-list');
+  if(!list) return;
+  if(!membersData.length){
+    list.innerHTML = '<p style="font-size:13px;color:var(--sub)">아직 참가 신청자가 없어요. 첫 번째로 신청해보세요.</p>';
+    return;
+  }
+  list.innerHTML = membersData.map((m,i)=>`
+    <div class="participant-chip" data-email="${(m.email||'').replace(/"/g,'&quot;')}">
+      <span class="p-avatar" style="background:${avatarColor(i)}">${avatarInner(m.photoUrl, m.name)}</span>
+      <span class="p-name">${m.name}</span>
+      <span class="p-dept">${m.dept || ''}</span>
+    </div>
+  `).join('');
 }
 
 const rosterModalBackdrop = document.getElementById('roster-modal-backdrop');
 const rosterModalContent = document.getElementById('roster-modal-content');
 function openRosterModal(email){
-  const p = rosterData.find(r => r.email === email);
-  if(!p || !rosterModalBackdrop || !rosterModalContent) return;
-  const typeLabel = p.contestType === '팀' ? `팀 참가${p.contestTeam ? ' · '+p.contestTeam : ''}` : '개인 참가';
+  const m = membersData.find(x => x.email === email);
+  if(!m || !rosterModalBackdrop || !rosterModalContent) return;
+  const projects = myProjects(email);
   rosterModalContent.innerHTML = `
     <div class="modal-body" style="padding:30px 28px 26px;">
-      <span class="modal-tag">참여자 정보</span>
-      <h3 class="modal-title" style="margin:0 0 16px;">${p.name}</h3>
+      <span class="modal-tag">참가자 정보</span>
+      <h3 class="modal-title" style="margin:0 0 16px;">${m.name}</h3>
       <div class="field" style="margin-bottom:14px;">
         <span class="field-label">소속</span>
-        <p style="margin:4px 0 0;font-size:14px;color:var(--ink);">${p.dept || '-'}</p>
+        <p style="margin:4px 0 0;font-size:14px;color:var(--ink);">${m.dept || '-'}</p>
       </div>
-      <div class="field" style="margin-bottom:14px;">
-        <span class="field-label">공모전 참가 방식</span>
-        <p style="margin:4px 0 0;font-size:14px;color:var(--ink);">${typeLabel}</p>
+      <div class="field" style="margin-bottom:8px;">
+        <span class="field-label">등록한 프로젝트 (${projects.length}개)</span>
       </div>
-      <div class="field">
-        <span class="field-label">이번 학기 도전 과제 · 주제</span>
-        <p style="margin:4px 0 0;font-size:14px;color:var(--ink);line-height:1.7;white-space:pre-wrap;word-break:break-word;">${p.challenge ? p.challenge : '아직 작성하지 않았어요.'}</p>
-      </div>
+      ${projects.length ? projects.map(p=>`
+        <div class="roster-row" data-project-open="${p.id}" style="cursor:pointer;">
+          <div class="r-avatar" style="background:${avatarColor(0)}">✦</div>
+          <div class="r-body">
+            <div class="r-name" style="font-size:13.5px;">${p.title}</div>
+            <div class="r-team">${p.topic || ''}</div>
+          </div>
+          <span class="r-pct-badge">${p.progress||0}%</span>
+        </div>
+      `).join('') : '<p style="font-size:13px;color:var(--sub)">아직 등록한 프로젝트가 없어요.</p>'}
     </div>
   `;
   rosterModalBackdrop.classList.add('open');
@@ -1042,78 +1385,49 @@ function openRosterModal(email){
 function closeRosterModal(){
   if(rosterModalBackdrop) rosterModalBackdrop.classList.remove('open');
 }
-const rosterModalClose = document.getElementById('roster-modal-close');
-if(rosterModalClose) rosterModalClose.addEventListener('click', closeRosterModal);
-if(rosterModalBackdrop) rosterModalBackdrop.addEventListener('click', (e)=>{ if(e.target === rosterModalBackdrop) closeRosterModal(); });
+document.getElementById('roster-modal-close').addEventListener('click', closeRosterModal);
+rosterModalBackdrop.addEventListener('click', (e)=>{ if(e.target === rosterModalBackdrop) closeRosterModal(); });
+rosterModalContent.addEventListener('click', (e)=>{
+  const row = e.target.closest('[data-project-open]');
+  if(row){
+    closeRosterModal();
+    openGalleryModal(row.dataset.projectOpen);
+  }
+});
 
 const rosterList = document.getElementById('roster-list');
 if(rosterList){
   rosterList.addEventListener('click', (e)=>{
-    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
-    const editBtn = e.target.closest('.r-edit');
-    if(editBtn){
-      e.stopPropagation();
-      if(!savedUser) return;
-      const mine = rosterData.find(p => p.email === savedUser.email);
-      if(mine) fillApplyFormForEdit(mine);
-      return;
-    }
-    const delBtn = e.target.closest('.r-delete');
-    if(delBtn){
-      e.stopPropagation();
-      if(!savedUser) return;
-      if(!confirm('참여 신청을 삭제할까요? 등록된 진행현황과 신청 정보가 모두 삭제돼요.')) return;
-      delBtn.disabled = true;
-      apiPost('deleteRoster', { email: savedUser.email }).then(res=>{
-        rosterData = res.roster || rosterData.filter(p => p.email !== savedUser.email);
-        renderRoster();
-        renderDashboard();
-      }).catch(err=>{
-        console.error('roster delete failed', err);
-        delBtn.disabled = false;
-        alert('삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
-      });
-      return;
-    }
-    const row = e.target.closest('.roster-row');
+    const row = e.target.closest('.participant-chip');
     if(row && row.dataset.email) openRosterModal(row.dataset.email);
   });
 }
 
-/* ---- 대시보드 (참여신청 데이터를 그대로 사용) ---- */
-const STAGES = ['8월 · 1회차', '9월 · 2회차', '10월 · 3회차', '11월 · 4회차'];
-// 각 회차가 실제로 시작되는 한국시간(KST, UTC+9) 기준 날짜. 이 시각이 지나야 전체 진행률 배지가 활성화됨.
-const STAGE_DATES = [
-  new Date('2026-08-01T00:00:00+09:00'),
-  new Date('2026-09-01T00:00:00+09:00'),
-  new Date('2026-10-01T00:00:00+09:00'),
-  new Date('2026-11-01T00:00:00+09:00')
-];
-function stageToPct(stage){
-  const idx = STAGES.indexOf(stage);
-  return idx >= 0 ? Math.round(((idx+1)/STAGES.length)*100) : 0;
-}
-function personPct(p){
-  return (typeof p.pct === 'number') ? p.pct : stageToPct(p.stage || '');
-}
-
-const pWrap = document.getElementById('p-cards');
-
+/* ---- 대시보드 ---- */
 function renderDashboard(){
-  const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
+  const savedUser = getSavedSession();
   const banner = document.getElementById('dash-banner');
 
-  // 전체 평균 진행률
-  const pctList = rosterData.map(personPct);
+  const pctList = projectsData.map(p=>p.progress||0);
   const avg = pctList.length ? Math.round(pctList.reduce((a,b)=>a+b,0) / pctList.length) : 0;
-  document.getElementById('overall-pct').textContent = rosterData.length ? avg + '%' : '-';
+  document.getElementById('overall-pct').textContent = projectsData.length ? avg + '%' : '-';
   document.getElementById('overall-ring').style.background =
     `conic-gradient(var(--violet) 0% ${avg}%, #E3E1F5 ${avg}% 100%)`;
-  document.getElementById('overall-desc').textContent = rosterData.length
-    ? `참여자 ${rosterData.length}명의 평균 진행률은 ${avg}%예요.`
-    : '아직 참여 신청이 없어요. 첫 신청자가 되어보세요!';
+  document.getElementById('overall-desc').textContent = projectsData.length
+    ? `등록된 프로젝트 ${projectsData.length}개의 평균 진행률은 ${avg}%예요.`
+    : '아직 등록된 프로젝트가 없어요. 마이페이지에서 첫 프로젝트를 만들어보세요!';
 
-  // 단계별 배지 (참여자 체크 여부와 무관하게, 실제 해당 회차 시작일이 지나야 활성화)
+  const heroMiniPct = document.getElementById('hero-mini-pct');
+  const heroMiniRing = document.getElementById('hero-mini-ring');
+  const heroMiniDesc = document.getElementById('hero-mini-desc');
+  if(heroMiniPct && heroMiniRing && heroMiniDesc){
+    heroMiniPct.textContent = projectsData.length ? avg + '%' : '-';
+    heroMiniRing.style.background = `conic-gradient(var(--coral) 0% ${avg}%, rgba(255,255,255,.32) ${avg}% 100%)`;
+    heroMiniDesc.textContent = projectsData.length
+      ? `프로젝트 ${projectsData.length}개 · 참가자 ${membersData.length}명 · 평균 ${avg}%`
+      : `참가자 ${membersData.length}명 · 아직 등록된 프로젝트가 없어요`;
+  }
+
   const stageMini = document.getElementById('stage-mini');
   const circled = ['①','②','③','④','⑤'];
   const nowTs = Date.now();
@@ -1122,170 +1436,287 @@ function renderDashboard(){
     return `<span class="${reached ? 'on' : ''}">${circled[i]} ${s}</span>`;
   }).join('');
 
-  // 내 신청 여부에 따른 안내 배너
-  const mine = savedUser ? rosterData.find(p => p.email === savedUser.email) : null;
-  if(banner) banner.style.display = (savedUser && !mine) ? 'block' : 'none';
-
-  // 참가자 카드
-  pWrap.innerHTML = '';
-  if(!rosterData.length){
-    pWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">아직 참여 신청자가 없어요.</p>';
-    return;
-  }
-  rosterData.forEach((p,i)=>{
-    const stage = p.stage || '';
-    const pct = personPct(p);
-    const stageLabel = stage || '시작 전';
-    const isMine = savedUser && p.email === savedUser.email;
-    const curIdx = STAGES.indexOf(stage);
-    const el = document.createElement('div');
-    el.className = 'p-card' + (isMine ? ' mine' : '');
-    el.innerHTML = `
-      ${isMine ? '<span class="p-mine-badge">내 진행현황</span>' : ''}
-      <div class="p-top">
-        <div class="avatar" style="background:${avatarColor(i)}">${p.name.slice(-2)}</div>
-        <div>
-          <div class="p-name">${p.name}</div>
-          <div class="p-type">${p.dept || ''}</div>
-        </div>
-        <span class="type-badge ${p.contestType==='개인'?'type-individual':'type-team'}">${p.contestType}</span>
-      </div>
-      <div class="p-goal">${p.challenge ? `🎯 ${p.challenge}` : (p.contestType==='팀' && p.contestTeam ? '공모전 팀: '+p.contestTeam : '개인 참가')}</div>
-      <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
-      <div class="p-bottom"><span class="stage">${stageLabel}</span><span>${pct}%</span></div>
-      ${isMine ? `
-        <div class="stepper" id="my-stage-stepper">
-          ${STAGES.map((s,si)=>{
-            const state = si < curIdx ? 'done' : (si === curIdx ? 'current' : '');
-            const lineState = si < curIdx ? 'done' : '';
-            const dot = `<div class="step ${state}" data-idx="${si}" title="${s}">
-              <div class="step-dot">${si < curIdx ? '✓' : si+1}</div>
-              <div class="step-label">${s.split(' · ')[0]}</div>
-            </div>`;
-            const line = si < STAGES.length-1 ? `<div class="step-line ${lineState}"></div>` : '';
-            return dot + line;
-          }).join('')}
-        </div>
-      ` : ''}
-    `;
-    pWrap.appendChild(el);
-  });
-
-  const stepper = document.getElementById('my-stage-stepper');
-  if(stepper){
-    stepper.querySelectorAll('.step').forEach(stepEl=>{
-      stepEl.addEventListener('click', ()=>{
-        if(stepEl.classList.contains('saving')) return;
-        const newStage = STAGES[Number(stepEl.dataset.idx)];
-        stepper.querySelectorAll('.step').forEach(s=>s.classList.add('saving'));
-        stepper.style.opacity = '.6';
-        apiPost('updateStage', { email: savedUser.email, stage: newStage }).then(res=>{
-          rosterData = res.roster || rosterData;
-          renderDashboard();
-          renderRoster();
-        }).catch(err=>{
-          console.error('stage update failed', err);
-          stepper.querySelectorAll('.step').forEach(s=>s.classList.remove('saving'));
-          stepper.style.opacity = '1';
-          alert('진행단계 저장에 실패했어요. 잠시 후 다시 시도해주세요.');
-        });
-      });
-    });
-  }
+  const mine = savedUser ? membersData.find(m => m.email === savedUser.email) : null;
+  if(banner) banner.style.display = (savedUser && mine && myProjects(savedUser.email).length === 0) ? 'block' : 'none';
 }
 
-let gallery = [];
-
-function loadResultsFromServer(){
-  if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">결과물을 불러오는 중...</p>';
-  return apiGet('results').then(data=>{
-    gallery = Array.isArray(data) ? data : (data.results || []);
-    renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
-    if(currentItemId) renderModal();
-  }).catch(err=>{
-    console.error('results load failed', err);
-    if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--coral)">결과물을 불러오지 못했어요. 새로고침 해주세요.</p>';
-  });
-}
-
-let commentsData = [];
-function getComments(item){
-  return commentsData.filter(c => c.itemId == item.id);
-}
-function loadCommentsFromServer(){
-  return apiGet('comments').then(data=>{
-    commentsData = Array.isArray(data) ? data : (data.comments || []);
-    renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
-    if(currentItemId) renderModal();
-  }).catch(err=>console.error('comments load failed', err));
-}
-
-function galleryThumbHtml(g, idx){
-  if(g.thumbUrl){
-    return `<div class="g-thumb" style="background:${avatarColor(idx)}">✦<img src="${g.thumbUrl}" alt="${g.title}" loading="lazy" onerror="this.remove()"></div>`;
-  }
-  if(g.fileType === 'application/pdf' && g.fileUrl){
-    return `<div class="g-thumb pdf" style="background:${avatarColor(idx)}"><span class="pdf-ic">📄</span>PDF</div>`;
-  }
-  return `<div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>`;
-}
-
+/* ---- 프로젝트 둘러보기 (읽기 전용, 관리는 마이페이지에서) ---- */
 const gWrap = document.getElementById('g-cards');
+
+function projectCardHtml(p, idx){
+  const author = membersData.find(m=>m.email===p.email);
+  const pct = p.progress || 0;
+  return `
+    <div class="g-card project-card" data-project-id="${p.id}">
+      <div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>
+      <div class="g-body">
+        <span class="g-tag">#${p.topic || ''}${(p.link || p.fileUrl) ? ' · 📎 첨부' : ''}</span>
+        <p class="g-title">${p.title}</p>
+        <div class="g-meta"><span>${author ? author.name : ''}</span><span>❤️ ${getLikeCount('프로젝트', p.id)} · 💬 ${getComments(p.id).length}</span></div>
+        <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
+        <div class="p-bottom"><span class="stage">${pct>=100?'완료':pct+'% 진행 중'}</span><span>${pct}%</span></div>
+      </div>
+    </div>
+  `;
+}
+
 function renderGallery(filter){
   gWrap.innerHTML = '';
-  const filtered = gallery.filter(g => filter==='all' || g.contestType===filter);
+  const filtered = projectsData.filter(p => filter==='all' || p.topic===filter);
   if(!filtered.length){
-    gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">아직 등록된 결과물이 없어요. 첫 번째로 올려보세요!</p>';
+    gWrap.innerHTML = '<p style="grid-column:1/-1;text-align:center;white-space:nowrap;font-size:13px;color:var(--sub)">아직 등록된 프로젝트가 없어요. 마이페이지에서 첫 번째로 만들어보세요!</p>';
     return;
   }
-  filtered.forEach((g,i)=>{
-    const el = document.createElement('div');
-    el.className = 'g-card';
-    el.innerHTML = `
-      ${galleryThumbHtml(g, i)}
-      <div class="g-body">
-        <span class="g-tag">#${g.tag}</span>
-        <p class="g-title">${g.title}</p>
-        <div class="g-meta"><span>${g.author}</span><span>💬 ${getComments(g).length}</span></div>
-      </div>
-    `;
-    el.addEventListener('click', ()=>openGalleryModal(g.id));
-    gWrap.appendChild(el);
+  gWrap.innerHTML = filtered.map((p,i)=> projectCardHtml(p, i)).join('');
+  gWrap.querySelectorAll('.project-card').forEach(card=>{
+    card.addEventListener('click', ()=>openGalleryModal(card.dataset.projectId));
   });
 }
 renderGallery('all');
-document.querySelectorAll('.fpill').forEach(btn=>{
+document.querySelectorAll('#filters .fpill').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#filters .fpill').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     renderGallery(btn.dataset.f);
   });
 });
-// roster/results/comments를 Apps Script 한 번의 호출로 같이 받아와서
-// 첫 로딩 시 발생하는 Apps Script 실행 왕복 횟수를 3회 → 1회로 줄임
-function loadAllData(){
-  const list = document.getElementById('roster-list');
-  if(list) list.innerHTML = '<p style="font-size:13px;color:var(--sub)">명단을 불러오는 중...</p>';
-  if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">결과물을 불러오는 중...</p>';
-  return apiGet('').then(data=>{
-    rosterData = data.roster || [];
-    commentsData = data.comments || [];
-    gallery = data.results || [];
-    renderRoster();
-    renderDashboard();
-    renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
-    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
-    refreshApplyGate(savedUser);
-    if(currentItemId) renderModal();
-  }).catch(err=>{
-    console.error('initial data load failed', err);
-    if(list) list.innerHTML = '<p style="font-size:13px;color:var(--coral)">명단을 불러오지 못했어요. 새로고침 해주세요.</p>';
-    if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--coral)">결과물을 불러오지 못했어요. 새로고침 해주세요.</p>';
+
+/* ---- 아카이브 (예전 프로젝트 공유 / 추천 자료 공유) ---- */
+const archiveWrap = document.getElementById('archive-cards');
+
+function archiveCardHtml(item, idx){
+  const author = membersData.find(m=>m.email===item.email);
+  const icon = item.type === '자료' ? '🔗' : '📁';
+  return `
+    <div class="g-card archive-card" data-archive-id="${item.id}">
+      <div class="g-thumb" style="background:${avatarColor(idx)}">${icon}</div>
+      <div class="g-body">
+        <span class="g-tag">#${item.type}${(item.link || item.fileUrl) ? ' · 첨부' : ''}</span>
+        <p class="g-title">${item.title}</p>
+        <div class="g-meta"><span>${author ? author.name : ''}</span><span>❤️ ${getLikeCount('아카이브', item.id)} · 💬 ${getComments(item.id).length}</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderArchive(filter){
+  if(!archiveWrap) return;
+  const filtered = archiveData.filter(a => filter==='all' || a.type===filter);
+  if(!filtered.length){
+    archiveWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">아직 등록된 아카이브 항목이 없어요. 첫 번째로 공유해보세요!</p>';
+    return;
+  }
+  archiveWrap.innerHTML = filtered.map((a,i)=>archiveCardHtml(a,i)).join('');
+  archiveWrap.querySelectorAll('.archive-card').forEach(card=>{
+    card.addEventListener('click', ()=>openArchiveDetail(card.dataset.archiveId));
   });
 }
-loadAllData();
+renderArchive('all');
+document.querySelectorAll('#archive-filters .fpill').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#archive-filters .fpill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderArchive(btn.dataset.f);
+  });
+});
 
-/* ---- 결과물 상세 모달 + 댓글 ---- */
+/* ---- 아카이브 상세보기 (본인 항목은 삭제 가능) ---- */
+const archiveDetailModalBackdrop = document.getElementById('archive-detail-modal-backdrop');
+const archiveDetailContent = document.getElementById('archive-detail-content');
+
+function openArchiveDetail(id){
+  const item = archiveData.find(a=>a.id===id);
+  if(!item || !archiveDetailModalBackdrop || !archiveDetailContent) return;
+  const author = membersData.find(m=>m.email===item.email);
+  const savedUser = getSavedSession();
+  const isMine = savedUser && item.email === savedUser.email;
+  const comments = getComments(item.id);
+  archiveDetailContent.innerHTML = `
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag">#${item.type}</span>
+      <h3 class="modal-title">${item.title}</h3>
+      <div class="modal-meta">
+        <div class="avatar" style="background:${avatarColor(0)};overflow:hidden;">${avatarInner(author ? author.photoUrl : '', author ? author.name : '')}</div>
+        <div>
+          <div class="m-author">${author ? author.name : ''}${isMine ? ' (나)' : ''}</div>
+          <div class="m-dept">${author ? author.dept : ''}</div>
+        </div>
+      </div>
+      <p class="modal-desc">${item.desc ? escapeHtml(item.desc) : '설명이 없어요.'}</p>
+      ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener" class="modal-link">바로가기 ↗</a>` : ''}
+      ${item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" rel="noopener" class="modal-link">첨부파일 보기 ↗</a>` : ''}
+      <div>${likeButtonHtml('아카이브', item.id)}</div>
+      ${isMine ? `<div class="owner-actions"><button type="button" class="btn btn-ghost btn-sm" id="archive-delete-btn" style="color:var(--coral);">삭제</button></div>` : ''}
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-comments">
+      <h4>댓글 ${comments.length}</h4>
+      <div class="comment-list" id="archive-comment-list">
+        ${comments.map((c,i)=>`
+          <div class="post">
+            <div class="avatar" style="background:${avatarColor(i+3)};overflow:hidden;">${avatarInner((membersData.find(m=>m.email===c.email)||{}).photoUrl, c.name)}</div>
+            <div class="post-body">
+              <div class="post-meta"><span style="font-weight:700;color:var(--ink)">${c.name}</span><span>${formatRelative(c.time)}</span></div>
+              <p class="post-snip" style="margin-top:4px">${escapeHtml(c.text)}</p>
+            </div>
+          </div>
+        `).join('') || '<p style="font-size:13px;color:var(--sub)">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>'}
+      </div>
+      ${savedUser ? `
+        <form class="comment-form" id="archive-comment-form">
+          <div class="avatar" style="width:32px;height:32px;font-size:11px;background:${avatarColor(comments.length+5)};overflow:hidden;">${avatarInner(savedUser.photoUrl, savedUser.name)}</div>
+          <input type="text" id="archive-comment-input" placeholder="댓글을 남겨보세요" required>
+          <button type="submit" class="btn btn-primary btn-sm">등록</button>
+        </form>
+      ` : `<p class="comment-gate">댓글을 남기려면 로그인이 필요해요.</p>`}
+    </div>
+  `;
+  wireLikeButton(archiveDetailContent, ()=>{
+    openArchiveDetail(id);
+    renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+  });
+  const commentForm = document.getElementById('archive-comment-form');
+  if(commentForm){
+    commentForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const input = document.getElementById('archive-comment-input');
+      const text = input.value.trim();
+      if(!text) return;
+      const submitBtn = commentForm.querySelector('button[type=submit]');
+      input.disabled = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '등록 중...';
+      apiPost('addComment', { itemId: item.id, name: savedUser.name, text, token: savedUser.token }).then(res=>{
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        commentsData = res.comments || commentsData;
+        openArchiveDetail(id);
+        renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+      }).catch(err=>{
+        console.error('archive comment save failed', err);
+        input.disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = '등록';
+        alert('댓글 등록에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    });
+  }
+  const deleteBtn = document.getElementById('archive-delete-btn');
+  if(deleteBtn){
+    deleteBtn.addEventListener('click', ()=>{
+      if(!confirm(`"${item.title}" 항목을 삭제할까요? 댓글도 함께 삭제돼요.`)) return;
+      apiPost('deleteArchiveItem', { id: item.id, token: savedUser.token }).then(res=>{
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        archiveData = res.archive || archiveData;
+        commentsData = res.comments || commentsData;
+        likesData = res.likes || likesData;
+        closeArchiveDetail();
+        renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+      }).catch(err=>{
+        console.error('archive delete failed', err);
+        alert('삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    });
+  }
+  archiveDetailModalBackdrop.classList.add('open');
+}
+function closeArchiveDetail(){
+  if(archiveDetailModalBackdrop) archiveDetailModalBackdrop.classList.remove('open');
+}
+document.getElementById('archive-detail-modal-close').addEventListener('click', closeArchiveDetail);
+archiveDetailModalBackdrop.addEventListener('click', (e)=>{ if(e.target===archiveDetailModalBackdrop) closeArchiveDetail(); });
+
+/* ---- 아카이브 올리기 모달 ---- */
+const archiveModalBackdrop = document.getElementById('archive-modal-backdrop');
+const ARCHIVE_MAX_FILE_MB = 20;
+let archiveFileData = null;
+
+function openArchiveModal(){
+  const user = getSavedSession();
+  if(!user){ openAuthModal('login'); return; }
+  document.getElementById('archive-type').value = archiveTypesData[0] || '프로젝트';
+  document.getElementById('archive-title').value = '';
+  document.getElementById('archive-desc').value = '';
+  document.getElementById('archive-link').value = '';
+  archiveFileData = null;
+  const fileInput = document.getElementById('archive-file');
+  if(fileInput) fileInput.value = '';
+  document.getElementById('archive-file-preview').innerHTML = '';
+  document.getElementById('archive-msg').textContent = '';
+  if(archiveModalBackdrop) archiveModalBackdrop.classList.add('open');
+}
+function closeArchiveModal(){
+  if(archiveModalBackdrop) archiveModalBackdrop.classList.remove('open');
+}
+document.getElementById('archive-new-btn').addEventListener('click', (e)=>{ e.preventDefault(); openArchiveModal(); });
+document.getElementById('archive-modal-close').addEventListener('click', closeArchiveModal);
+archiveModalBackdrop.addEventListener('click', (e)=>{ if(e.target===archiveModalBackdrop) closeArchiveModal(); });
+
+const archiveFileInput = document.getElementById('archive-file');
+if(archiveFileInput){
+  archiveFileInput.addEventListener('change', ()=>{
+    const file = archiveFileInput.files[0];
+    const preview = document.getElementById('archive-file-preview');
+    archiveFileData = null;
+    preview.innerHTML = '';
+    if(!file) return;
+    if(file.size > ARCHIVE_MAX_FILE_MB*1024*1024){
+      preview.innerHTML = `<p style="font-size:12px;color:var(--coral);margin:6px 0 0;">파일이 너무 커요. ${ARCHIVE_MAX_FILE_MB}MB 이하로 올려주세요.</p>`;
+      archiveFileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const dataUrl = reader.result;
+      const base64 = dataUrl.split(',')[1];
+      archiveFileData = { base64, name: file.name, mime: file.type };
+      if(file.type.indexOf('image/') === 0){
+        preview.innerHTML = `<img src="${dataUrl}" alt="미리보기" style="max-height:120px;border-radius:var(--radius-sm);display:block;margin-top:6px;border:1px solid var(--line);">`;
+      } else {
+        preview.innerHTML = `<span class="pf">📄 ${file.name}</span>`;
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('archive-form').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const user = getSavedSession();
+  if(!user) return;
+  const type = document.getElementById('archive-type').value;
+  const title = document.getElementById('archive-title').value.trim();
+  const desc = document.getElementById('archive-desc').value.trim();
+  const link = document.getElementById('archive-link').value.trim();
+  const msg = document.getElementById('archive-msg');
+  if(!title){ msg.style.color = 'var(--coral)'; msg.textContent = '제목을 입력해주세요.'; return; }
+  if(!link && !archiveFileData){ msg.style.color = 'var(--coral)'; msg.textContent = '링크 또는 파일 중 하나는 꼭 넣어주세요.'; return; }
+
+  const btn = document.getElementById('archive-submit-btn');
+  btn.disabled = true;
+  btn.textContent = archiveFileData ? '업로드 중...' : '올리는 중...';
+  msg.style.color = 'var(--sub)';
+  msg.textContent = archiveFileData ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
+
+  apiPost('addArchiveItem', {
+    type, title, desc, link, token: user.token,
+    fileData: archiveFileData ? archiveFileData.base64 : '',
+    fileName: archiveFileData ? archiveFileData.name : '',
+    fileMime: archiveFileData ? archiveFileData.mime : ''
+  }).then(res=>{
+    if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+    archiveData = res.archive || archiveData;
+    closeArchiveModal();
+    renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+  }).catch(err=>{
+    console.error('archive save failed', err);
+    msg.style.color = 'var(--coral)';
+    msg.textContent = err && err.message ? err.message : '저장에 실패했어요.';
+  }).finally(()=>{
+    btn.disabled = false; btn.textContent = '올리기';
+  });
+});
+
+/* ---- 프로젝트 상세 모달 (개발계획 · 진행기록 · 댓글, 읽기 전용) ---- */
 const modalBackdrop = document.getElementById('g-modal-backdrop');
 const modalContent = document.getElementById('g-modal-content');
 let currentItemId = null;
@@ -1302,39 +1733,80 @@ function closeGalleryModal(){
 document.getElementById('g-modal-close').addEventListener('click', closeGalleryModal);
 modalBackdrop.addEventListener('click', (e)=>{ if(e.target === modalBackdrop) closeGalleryModal(); });
 
-function renderModal(){
-  const idx = gallery.findIndex(g => g.id === currentItemId);
-  const item = gallery[idx];
-  if(!item) return;
-  const comments = getComments(item);
-  const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
+function escapeHtml(str){
+  return (str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
 
-  let heroHtml;
-  if(item.thumbUrl){
-    heroHtml = `<div class="modal-hero" style="background:${avatarColor(idx)}">✦<img src="${item.thumbUrl}" alt="${item.title}" onerror="this.remove()"></div>`;
-  } else if(item.fileType === 'application/pdf' && item.fileUrl){
-    heroHtml = `<div class="modal-hero pdf" style="background:${avatarColor(idx)}"><span class="pdf-ic">📄</span>PDF 파일</div>`;
-  } else {
-    heroHtml = `<div class="modal-hero" style="background:${avatarColor(idx)}">✦</div>`;
-  }
+function renderModal(){
+  const idx = projectsData.findIndex(p => p.id === currentItemId);
+  const item = projectsData[idx];
+  if(!item) return;
+  const comments = getComments(item.id);
+  const logs = getLogs(item.id);
+  const author = membersData.find(m=>m.email===item.email);
+  const savedUser = getSavedSession();
+  const pct = item.progress || 0;
+  const isMine = savedUser && item.email === savedUser.email;
+
+  const heroHtml = `<div class="modal-hero" style="background:${avatarColor(idx)}">✦</div>`;
+
+  const checklistHtml = (item.steps||[]).length
+    ? (isMine
+        ? `<ul class="m-checklist" id="m-checklist-${item.id}">
+            ${item.steps.map((s,si)=>`<li class="${s.done?'done':''}"><input type="checkbox" data-step-idx="${si}" ${s.done?'checked':''}><label>${escapeHtml(s.text)}</label></li>`).join('')}
+          </ul>`
+        : `<ul class="checklist" style="list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:8px;">
+            ${item.steps.map(s=>`<li style="font-size:13.5px;${s.done?'color:var(--sub);text-decoration:line-through;':''}">${s.done?'✅':'⬜'} ${escapeHtml(s.text)}</li>`).join('')}
+          </ul>`)
+    : '<p style="font-size:13px;color:var(--sub);margin:0 0 16px;">등록된 개발 계획이 없어요.</p>';
 
   modalContent.innerHTML = `
     ${heroHtml}
     <div class="modal-body">
-      <span class="modal-tag">#${item.tag}</span>
+      <span class="modal-tag">#${item.topic || ''}</span>
       <h3 class="modal-title">${item.title}</h3>
       <div class="modal-meta">
-        <div class="avatar" style="background:${avatarColor(idx)}">${item.author.slice(-2)}</div>
+        <div class="avatar" style="background:${avatarColor(idx)};overflow:hidden;">${avatarInner(author ? author.photoUrl : '', author ? author.name : '')}</div>
         <div>
-          <div class="m-author">${item.author}</div>
-          <div class="m-dept">${item.dept || ''}</div>
+          <div class="m-author">${author ? author.name : ''}${isMine ? ' (나)' : ''}</div>
+          <div class="m-dept">${author ? author.dept : ''}</div>
         </div>
       </div>
-      <p class="modal-desc">${item.desc || ''}</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        ${item.link ? `<a href="${item.link}" target="_blank" class="modal-link">결과물 바로가기 ↗</a>` : ''}
-        ${item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" class="modal-link">첨부파일 보기 ↗</a>` : ''}
-      </div>
+      <p class="modal-desc">${item.goal ? escapeHtml(item.goal) : ''}</p>
+      <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
+      <div class="p-bottom"><span class="stage">${pct>=100?'완료':pct+'% 진행 중'}</span><span>${pct}%</span></div>
+      ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener" class="modal-link">결과물 바로가기 ↗</a>` : ''}
+      ${item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" rel="noopener" class="modal-link">첨부파일 보기 ↗</a>` : ''}
+      <div>${likeButtonHtml('프로젝트', item.id)}</div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-body" style="padding-top:0;">
+      <h4 style="margin:0 0 10px;font-size:15px;">개발 계획</h4>
+      ${checklistHtml}
+      <h4 style="margin:0 0 10px;font-size:15px;">진행 기록 ${logs.length}</h4>
+      ${logs.length ? logs.map(l=>`
+        <div class="post">
+          <div class="avatar" style="width:32px;height:32px;font-size:11px;background:${avatarColor(1)}">${l.progress}%</div>
+          <div class="post-body">
+            <div class="post-meta"><span style="font-weight:700;color:var(--ink)">${l.progress}% 기록</span><span>${formatRelative(l.loggedAt)}</span></div>
+            <p class="post-snip" style="margin-top:4px">${escapeHtml(l.content)}</p>
+          </div>
+        </div>
+      `).join('') : '<p style="font-size:13px;color:var(--sub)">아직 진행 기록이 없어요.</p>'}
+      ${isMine ? `
+        <div class="inline-log-form">
+          <label>오늘 진행 내용 기록하기</label>
+          <textarea id="modal-log-content" rows="2" placeholder="무엇을 했는지, 어떤 어려움이 있었는지 적어주세요." style="width:100%;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+          <label>현재 진행률 <span id="modal-log-pct-label">${pct}%</span></label>
+          <input type="range" id="modal-log-pct" min="0" max="100" step="5" value="${pct}">
+          <p class="apply-note" id="modal-log-msg" style="margin-top:8px;"></p>
+          <div class="owner-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="modal-log-submit-btn">기록 추가</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="modal-edit-project-btn">프로젝트 정보 수정</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="modal-delete-project-btn" style="color:var(--coral);">삭제</button>
+          </div>
+        </div>
+      ` : ''}
     </div>
     <div class="modal-divider"></div>
     <div class="modal-comments">
@@ -1342,21 +1814,21 @@ function renderModal(){
       <div class="comment-list" id="modal-comment-list">
         ${comments.map((c,i)=>`
           <div class="post">
-            <div class="avatar" style="background:${avatarColor(i+3)}">${c.name.slice(-2)}</div>
+            <div class="avatar" style="background:${avatarColor(i+3)};overflow:hidden;">${avatarInner((membersData.find(m=>m.email===c.email)||{}).photoUrl, c.name)}</div>
             <div class="post-body">
-              <div class="post-meta"><span style="font-weight:700;color:var(--ink)">${c.name}</span><span>${c.time}</span></div>
-              <p class="post-snip" style="margin-top:4px">${c.text}</p>
+              <div class="post-meta"><span style="font-weight:700;color:var(--ink)">${c.name}</span><span>${formatRelative(c.time)}</span></div>
+              <p class="post-snip" style="margin-top:4px">${escapeHtml(c.text)}</p>
             </div>
           </div>
         `).join('') || '<p style="font-size:13px;color:var(--sub)">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>'}
       </div>
       ${savedUser ? `
         <form class="comment-form" id="comment-form">
-          <div class="avatar" style="width:32px;height:32px;font-size:11px;background:${avatarColor(comments.length+5)}">${savedUser.name.slice(-2)}</div>
+          <div class="avatar" style="width:32px;height:32px;font-size:11px;background:${avatarColor(comments.length+5)};overflow:hidden;">${avatarInner(savedUser.photoUrl, savedUser.name)}</div>
           <input type="text" id="comment-input" placeholder="댓글을 남겨보세요" required>
           <button type="submit" class="btn btn-primary btn-sm">등록</button>
         </form>
-      ` : `<p class="comment-gate">댓글을 남기려면 Google 로그인이 필요해요.</p>`}
+      ` : `<p class="comment-gate">댓글을 남기려면 로그인이 필요해요.</p>`}
     </div>
   `;
 
@@ -1371,7 +1843,7 @@ function renderModal(){
       input.disabled = true;
       submitBtn.disabled = true;
       submitBtn.textContent = '등록 중...';
-      apiPost('addComment', { itemId: item.id, email: savedUser.email, name: savedUser.name, text }).then(res=>{
+      apiPost('addComment', { itemId: item.id, name: savedUser.name, text, token: savedUser.token }).then(res=>{
         commentsData = res.comments || commentsData;
         renderModal();
         renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
@@ -1384,60 +1856,221 @@ function renderModal(){
       });
     });
   }
-}
 
-/* ---- 결과물 업로드 ---- */
-const MAX_FILE_MB = 20;
-let uploadFileData = null; // {base64, name, mime}
+  if(isMine){
+    const checklistEl = document.getElementById(`m-checklist-${item.id}`);
+    if(checklistEl){
+      checklistEl.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+        cb.addEventListener('change', ()=>{
+          const si = Number(cb.dataset.stepIdx);
+          const steps = (item.steps||[]).map((s,i)=> i===si ? Object.assign({}, s, {done: cb.checked}) : s);
+          apiPost('updateProjectSteps', { projectId: item.id, steps, token: savedUser.token }).then(res=>{
+            if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+            projectsData = res.projects || projectsData;
+            renderModal();
+            renderDashboard();
+            renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+            if(typeof renderMyPage === 'function') renderMyPage(savedUser);
+          }).catch(err=>{
+            console.error('step toggle failed', err);
+            cb.checked = !cb.checked;
+            alert('체크 상태 저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+          });
+        });
+      });
+    }
 
-const uploadModalBackdrop = document.getElementById('upload-modal-backdrop');
+    const logPct = document.getElementById('modal-log-pct');
+    const logPctLabel = document.getElementById('modal-log-pct-label');
+    if(logPct) logPct.addEventListener('input', ()=>{ logPctLabel.textContent = logPct.value + '%'; });
 
-function openUploadModal(){
-  const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
-  const gate = document.getElementById('upload-gate');
-  const form = document.getElementById('upload-form');
-  if(savedUser){
-    gate.style.display = 'none';
-    form.style.display = 'flex';
-  } else {
-    gate.style.display = 'flex';
-    form.style.display = 'none';
-    drawGoogleButton('g_id_signin_upload');
+    const logSubmitBtn = document.getElementById('modal-log-submit-btn');
+    if(logSubmitBtn){
+      logSubmitBtn.addEventListener('click', ()=>{
+        const contentEl = document.getElementById('modal-log-content');
+        const content = contentEl.value.trim();
+        const msgEl = document.getElementById('modal-log-msg');
+        if(!content){ msgEl.style.color = 'var(--coral)'; msgEl.textContent = '진행 내용을 입력해주세요.'; return; }
+        const progress = Number(logPct.value);
+        logSubmitBtn.disabled = true; logSubmitBtn.textContent = '저장 중...';
+        msgEl.style.color = 'var(--sub)'; msgEl.textContent = '';
+        apiPost('addProgressLog', { projectId: item.id, content, progress, token: savedUser.token }).then(res=>{
+          if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+          projectsData = res.projects || projectsData;
+          logsData = res.logs || logsData;
+          renderModal();
+          renderDashboard();
+          renderRoster();
+          renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+          if(typeof renderMyPage === 'function') renderMyPage(savedUser);
+        }).catch(err=>{
+          console.error('log add failed', err);
+          msgEl.style.color = 'var(--coral)';
+          msgEl.textContent = err && err.message ? err.message : '기록 저장에 실패했어요.';
+        }).finally(()=>{
+          logSubmitBtn.disabled = false; logSubmitBtn.textContent = '기록 추가';
+        });
+      });
+    }
+
+    const editBtn = document.getElementById('modal-edit-project-btn');
+    if(editBtn) editBtn.addEventListener('click', ()=>{ openProjectModal(item.id); });
+
+    const deleteBtn = document.getElementById('modal-delete-project-btn');
+    if(deleteBtn) deleteBtn.addEventListener('click', ()=>{
+      if(!confirm(`"${item.title}" 프로젝트를 삭제할까요? 진행 기록과 댓글도 함께 삭제돼요.`)) return;
+      apiPost('deleteProject', { projectId: item.id, token: savedUser.token }).then(res=>{
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        projectsData = res.projects || projectsData;
+        logsData = res.logs || logsData;
+        commentsData = res.comments || commentsData;
+        likesData = res.likes || likesData;
+        closeGalleryModal();
+        renderDashboard();
+        renderRoster();
+        renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+        if(typeof renderMyPage === 'function') renderMyPage(savedUser);
+      }).catch(err=>{
+        console.error('delete failed', err);
+        alert('삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    });
   }
-  uploadModalBackdrop.classList.add('open');
-}
-function closeUploadModal(){
-  uploadModalBackdrop.classList.remove('open');
-}
-document.getElementById('upload-modal-close').addEventListener('click', closeUploadModal);
-uploadModalBackdrop.addEventListener('click', (e)=>{ if(e.target === uploadModalBackdrop) closeUploadModal(); });
 
-document.addEventListener('click', (e)=>{
-  const trigger = e.target.closest('#gallery-upload-btn');
-  if(trigger){
-    e.preventDefault();
-    openUploadModal();
+  wireLikeButton(modalContent, ()=>{
+    renderModal();
+    renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+  });
+}
+
+/* ---- 마이페이지 (내 프로젝트 여러 개 등록 · 진행현황) ---- */
+const TOPICS_FALLBACK = ['업무 효율화를 위한 AI 학습', '바이브코딩 내재화 및 실무 적용', 'AI활용 사례 공모전 출품', '기타'];
+let topicsData = TOPICS_FALLBACK.slice();
+
+function myProjectCardHtml(p, idx){
+  const pct = p.progress || 0;
+  return `
+    <div class="g-card project-card" data-project-id="${p.id}">
+      <div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>
+      <div class="g-body">
+        <span class="g-tag">#${p.topic || ''}${(p.link || p.fileUrl) ? ' · 📎 첨부' : ''}</span>
+        <p class="g-title">${p.title}</p>
+        <div class="g-meta"><span>${(p.steps||[]).filter(s=>s.done).length}/${(p.steps||[]).length} 단계 완료</span><span>${getLogs(p.id).length}개 기록</span></div>
+        <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
+        <div class="p-bottom"><span class="stage">${pct>=100?'완료':pct+'% 진행 중'}</span><span>${pct}%</span></div>
+        <div class="p-actions">
+          <button type="button" class="p-action-btn p-open">진행기록</button>
+          <button type="button" class="p-action-btn p-edit">수정</button>
+          <button type="button" class="p-action-btn p-delete">삭제</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMyPage(user){
+  const gate = document.getElementById('mypage-gate');
+  const content = document.getElementById('mypage-content');
+  if(!gate || !content) return;
+  if(!user){
+    gate.style.display = 'block';
+    content.style.display = 'none';
+    return;
   }
-});
+  gate.style.display = 'none';
+  content.style.display = 'block';
 
-const uploadFileInput = document.getElementById('upload-file');
-if(uploadFileInput){
-  uploadFileInput.addEventListener('change', ()=>{
-    const file = uploadFileInput.files[0];
-    const preview = document.getElementById('upload-preview');
-    uploadFileData = null;
+  const avatarEl = document.getElementById('mypage-avatar');
+  if(avatarEl) avatarEl.innerHTML = avatarInner(user.photoUrl, user.name);
+  const nameEl = document.getElementById('mypage-profile-name');
+  if(nameEl) nameEl.textContent = user.name + (user.dept ? ' · ' + user.dept : '');
+
+  const mine = myProjects(user.email);
+  const list = document.getElementById('my-project-list');
+  const avg = mine.length ? Math.round(mine.reduce((a,p)=>a+(p.progress||0),0) / mine.length) : 0;
+  const totalLogs = logsData.filter(l=>l.email===user.email).length;
+  const lastTimes = mine.map(p=>p.updatedAt).concat(logsData.filter(l=>l.email===user.email).map(l=>l.loggedAt)).filter(Boolean).sort().reverse();
+
+  document.getElementById('my-pct').textContent = avg + '%';
+  document.getElementById('my-ring').style.background = `conic-gradient(var(--violet) 0% ${avg}%, #E3E1F5 ${avg}% 100%)`;
+  document.getElementById('my-project-count').textContent = mine.length;
+  document.getElementById('my-log-count').textContent = totalLogs;
+  document.getElementById('my-last-update').textContent = lastTimes.length ? formatRelative(lastTimes[0]) : '-';
+
+  if(!mine.length){
+    list.innerHTML = '<div class="mypage-empty">아직 등록한 프로젝트가 없어요.<br>이번 시즌 도전할 주제를 정하고 첫 프로젝트를 만들어보세요.</div>';
+    return;
+  }
+  list.innerHTML = mine.map((p,i)=>myProjectCardHtml(p,i)).join('');
+  list.querySelectorAll('.project-card').forEach(card=>{
+    const id = card.dataset.projectId;
+    card.querySelector('.p-open').addEventListener('click', (e)=>{ e.stopPropagation(); openGalleryModal(id); });
+    card.querySelector('.p-edit').addEventListener('click', (e)=>{ e.stopPropagation(); openProjectModal(id); });
+    card.querySelector('.p-delete').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const p = mine.find(x=>x.id===id);
+      if(!p) return;
+      if(!confirm(`"${p.title}" 프로젝트를 삭제할까요? 진행 기록과 댓글도 함께 삭제돼요.`)) return;
+      apiPost('deleteProject', { projectId: id, token: user.token }).then(res=>{
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        projectsData = res.projects || projectsData;
+        logsData = res.logs || logsData;
+        commentsData = res.comments || commentsData;
+        likesData = res.likes || likesData;
+        renderDashboard();
+        renderRoster();
+        renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+        renderMyPage(user);
+      }).catch(err=>{
+        console.error('delete failed', err);
+        alert('삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    });
+    card.addEventListener('click', ()=>openGalleryModal(id));
+  });
+}
+
+
+/* ---- 프로젝트 생성/수정 모달 ---- */
+const projectModalBackdrop = document.getElementById('project-modal-backdrop');
+const projectStepsList = document.getElementById('project-steps-list');
+const PROJECT_MAX_FILE_MB = 20;
+let editingProjectId = null;
+let projectFileData = null; // {base64, name, mime}
+
+function populateTopicSelect(){
+  const sel = document.getElementById('project-topic');
+  sel.innerHTML = topicsData.map(t=>`<option>${escapeHtml(t)}</option>`).join('');
+}
+function addProjectStepRow(text, done){
+  const row = document.createElement('div');
+  row.className = 'step-row';
+  row.dataset.done = done ? '1' : '0';
+  row.innerHTML = `<input type="text" placeholder="예: 데이터 수집 및 정리" value="${escapeHtml(text||'')}">
+    <button type="button" class="icon-btn">✕</button>`;
+  row.querySelector('.icon-btn').addEventListener('click', ()=>row.remove());
+  projectStepsList.appendChild(row);
+}
+document.getElementById('project-add-step-btn').addEventListener('click', ()=>addProjectStepRow('', false));
+
+const projectFileInput = document.getElementById('project-file');
+if(projectFileInput){
+  projectFileInput.addEventListener('change', ()=>{
+    const file = projectFileInput.files[0];
+    const preview = document.getElementById('project-file-preview');
+    projectFileData = null;
     preview.innerHTML = '';
     if(!file) return;
-    if(file.size > MAX_FILE_MB*1024*1024){
-      preview.innerHTML = `<p style="font-size:12px;color:var(--coral);margin:6px 0 0;">파일이 너무 커요. ${MAX_FILE_MB}MB 이하로 올려주세요.</p>`;
-      uploadFileInput.value = '';
+    if(file.size > PROJECT_MAX_FILE_MB*1024*1024){
+      preview.innerHTML = `<p style="font-size:12px;color:var(--coral);margin:6px 0 0;">파일이 너무 커요. ${PROJECT_MAX_FILE_MB}MB 이하로 올려주세요.</p>`;
+      projectFileInput.value = '';
       return;
     }
     const reader = new FileReader();
     reader.onload = ()=>{
       const dataUrl = reader.result;
       const base64 = dataUrl.split(',')[1];
-      uploadFileData = { base64, name: file.name, mime: file.type };
+      projectFileData = { base64, name: file.name, mime: file.type };
       if(file.type.indexOf('image/') === 0){
         preview.innerHTML = `<img src="${dataUrl}" alt="미리보기">`;
       } else {
@@ -1448,186 +2081,435 @@ if(uploadFileInput){
   });
 }
 
-const uploadForm = document.getElementById('upload-form');
-if(uploadForm){
-  uploadForm.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const savedUser = JSON.parse(localStorage.getItem('px_user') || 'null');
-    const msg = document.getElementById('upload-msg');
-    if(!savedUser){ msg.style.color = 'var(--coral)'; msg.textContent = 'Google 로그인이 필요해요.'; return; }
+function openProjectModal(projectId){
+  const user = getSavedSession();
+  if(!user){ openAuthModal('login'); return; }
+  editingProjectId = projectId || null;
+  const editing = editingProjectId ? projectsData.find(p=>p.id===editingProjectId) : null;
 
-    const title = document.getElementById('upload-title').value.trim();
-    const tag = document.getElementById('upload-tag').value.trim();
-    const desc = document.getElementById('upload-desc').value.trim();
-    const link = document.getElementById('upload-link').value.trim();
+  document.getElementById('project-modal-tag').textContent = editing ? 'EDIT PROJECT' : 'NEW PROJECT';
+  document.getElementById('project-modal-title').textContent = editing ? '프로젝트 정보 수정' : '새 프로젝트 만들기';
+  document.getElementById('project-submit-btn').textContent = editing ? '수정 완료' : '프로젝트 만들기';
+  document.getElementById('project-msg').textContent = '';
+  document.getElementById('project-title').value = editing ? editing.title : '';
+  document.getElementById('project-goal').value = editing ? (editing.goal||'') : '';
+  document.getElementById('project-link').value = editing ? (editing.link||'') : '';
+  document.getElementById('project-completed').checked = editing ? (editing.progress >= 100) : false;
+  populateTopicSelect();
+  if(editing) document.getElementById('project-topic').value = editing.topic || topicsData[0];
 
-    if(!title || !tag || !desc){ msg.style.color = 'var(--coral)'; msg.textContent = '제목, 카테고리, 소개를 모두 입력해주세요.'; return; }
-    if(!link && !uploadFileData){ msg.style.color = 'var(--coral)'; msg.textContent = '링크 또는 파일 중 하나는 꼭 넣어주세요.'; return; }
+  projectFileData = null;
+  if(projectFileInput) projectFileInput.value = '';
+  document.getElementById('project-file-preview').innerHTML = '';
+  const existingNote = document.getElementById('project-existing-file-note');
+  existingNote.style.display = (editing && editing.fileUrl) ? 'block' : 'none';
 
-    const myEntry = findMyEntry(savedUser.email);
-    const payload = {
-      title, tag, desc, link,
-      email: savedUser.email,
-      name: savedUser.name,
-      dept: myEntry ? myEntry.dept : '',
-      contestType: myEntry ? myEntry.contestType : '개인',
-      fileData: uploadFileData ? uploadFileData.base64 : '',
-      fileName: uploadFileData ? uploadFileData.name : '',
-      fileMime: uploadFileData ? uploadFileData.mime : ''
-    };
+  projectStepsList.innerHTML = '';
+  if(editing && (editing.steps||[]).length){
+    editing.steps.forEach(s=>addProjectStepRow(s.text, s.done));
+  } else {
+    addProjectStepRow('', false); addProjectStepRow('', false);
+  }
+  if(projectModalBackdrop) projectModalBackdrop.classList.add('open');
+}
+function closeProjectModal(){
+  if(projectModalBackdrop) projectModalBackdrop.classList.remove('open');
+  editingProjectId = null;
+}
+document.getElementById('project-modal-close').addEventListener('click', closeProjectModal);
+projectModalBackdrop.addEventListener('click', (e)=>{ if(e.target===projectModalBackdrop) closeProjectModal(); });
 
-    const submitBtn = document.getElementById('upload-submit');
-    submitBtn.disabled = true;
-    submitBtn.textContent = uploadFileData ? '파일 업로드 중...' : '올리는 중...';
-    msg.style.color = 'var(--sub)';
-    msg.textContent = uploadFileData ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
+document.getElementById('project-form').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const user = getSavedSession();
+  if(!user) return;
+  const title = document.getElementById('project-title').value.trim();
+  const msg = document.getElementById('project-msg');
+  if(!title){ msg.style.color = 'var(--coral)'; msg.textContent = '프로젝트명을 입력해주세요.'; return; }
 
-    apiPost('addResult', payload).then(res=>{
-      if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-      gallery = res.results || gallery;
-      renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
-      submitBtn.disabled = false;
-      submitBtn.textContent = '갤러리에 올리기';
-      uploadForm.reset();
-      document.getElementById('upload-preview').innerHTML = '';
-      uploadFileData = null;
-      msg.style.color = '#0F9D74';
-      msg.textContent = '등록됐어요! 갤러리에서 확인해보세요.';
-      setTimeout(closeUploadModal, 900);
-    }).catch(err=>{
-      console.error('upload failed', err);
-      submitBtn.disabled = false;
-      submitBtn.textContent = '갤러리에 올리기';
-      msg.style.color = 'var(--coral)';
-      msg.textContent = '업로드 실패: ' + (err && err.message ? err.message : '잠시 후 다시 시도해주세요.');
-    });
+  const steps = [...projectStepsList.querySelectorAll('.step-row')]
+    .map(row => ({ text: row.querySelector('input[type=text]').value.trim(), done: row.dataset.done === '1' }))
+    .filter(s => s.text);
+  const topic = document.getElementById('project-topic').value;
+  const goal = document.getElementById('project-goal').value.trim();
+  const link = document.getElementById('project-link').value.trim();
+  const completed = document.getElementById('project-completed').checked;
+
+  const btn = document.getElementById('project-submit-btn');
+  btn.disabled = true;
+  btn.textContent = projectFileData ? '파일 업로드 중...' : (editingProjectId ? '수정하는 중...' : '만드는 중...');
+  msg.style.color = 'var(--sub)';
+  msg.textContent = projectFileData ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
+
+  const action = editingProjectId ? 'updateProjectInfo' : 'createProject';
+  const payload = {
+    title, topic, goal, steps, link, completed, token: user.token,
+    fileData: projectFileData ? projectFileData.base64 : '',
+    fileName: projectFileData ? projectFileData.name : '',
+    fileMime: projectFileData ? projectFileData.mime : ''
+  };
+  if(editingProjectId) payload.projectId = editingProjectId;
+
+  apiPost(action, payload).then(res=>{
+    if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+    projectsData = res.projects || projectsData;
+    closeProjectModal();
+    renderDashboard();
+    renderRoster();
+    renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
+    renderMyPage(user);
+    if(!editingProjectId){
+      const created = [...projectsData].reverse().find(p=>p.email===user.email && p.title===title);
+      if(created) openGalleryModal(created.id);
+    } else if(currentItemId === editingProjectId){
+      renderModal();
+    }
+  }).catch(err=>{
+    console.error('project save failed', err);
+    msg.style.color = 'var(--coral)';
+    msg.textContent = err && err.message ? err.message : '저장에 실패했어요.';
+  }).finally(()=>{
+    btn.disabled = false; btn.textContent = editingProjectId ? '수정 완료' : '프로젝트 만들기';
+  });
+});
+
+document.getElementById('mypage-new-project-btn').addEventListener('click', (e)=>{
+  e.preventDefault();
+  openProjectModal(null);
+});
+document.getElementById('mypage-gate-login-btn').addEventListener('click', (e)=>{
+  e.preventDefault();
+  openAuthModal('login');
+});
+const galleryNewProjectBtn = document.getElementById('gallery-new-project-btn');
+if(galleryNewProjectBtn){
+  galleryNewProjectBtn.addEventListener('click', (e)=>{
+    const user = getSavedSession();
+    if(user){
+      e.preventDefault();
+      openProjectModal(null);
+    }
+    // 로그인 안 된 경우: 기본 앵커 동작으로 #dashboard 섹션까지 스크롤 → 그곳의 로그인 게이트 버튼 이용
   });
 }
 
-/* ---- Google 로그인 ---- */
-const GOOGLE_CLIENT_ID = "1031715139435-94373dn1gufmb3estvrp2am10ftco8ee.apps.googleusercontent.com";
+/* ---- 자체 로그인 (이메일 + 비밀번호, 세션 토큰) ---- */
+const PROTO_STORAGE_KEY = 'px_user_proto_v2';
+const REQUIRED_EMAIL_DOMAIN = '@donga.com';
 
-function parseJwt(token){
-  const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-  const json = decodeURIComponent(atob(base64).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-  return JSON.parse(json);
+function getSavedSession(){
+  try { return JSON.parse(localStorage.getItem(PROTO_STORAGE_KEY) || 'null'); }
+  catch(e){ return null; }
+}
+function saveSession(user){
+  localStorage.setItem(PROTO_STORAGE_KEY, JSON.stringify(user));
+}
+function clearSession(){
+  localStorage.removeItem(PROTO_STORAGE_KEY);
 }
 
 function renderUserState(user){
   const cta = document.getElementById('nav-cta');
   if(user){
     cta.innerHTML = `
-      <div class="user-chip"><img src="${user.picture}" alt="" class="user-avatar"><span class="user-name">${user.name}</span></div>
-      <a href="#" class="btn btn-ghost btn-sm" id="logout-btn">로그아웃</a>
+      <div class="acct" id="acct-wrap">
+        <button type="button" class="acct-trigger" id="acct-trigger">
+          <span class="acct-avatar" style="background:${avatarColor(0)};overflow:hidden;">${avatarInner(user.photoUrl, user.name)}</span>
+          <span class="acct-trigger-text">
+            <span class="acct-trigger-name">${user.name}</span>
+            <span class="acct-trigger-dept">${user.dept ? '동아일보 ' + user.dept : '동아일보'}</span>
+          </span>
+          <svg class="acct-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="acct-dropdown" id="acct-dropdown">
+          <div class="acct-dropdown-head">
+            <span class="acct-avatar lg" style="background:${avatarColor(0)};overflow:hidden;">${avatarInner(user.photoUrl, user.name)}</span>
+            <div>
+              <div class="acct-dropdown-name">${user.name}</div>
+              <div class="acct-dropdown-dept">${user.dept ? '동아일보 · ' + user.dept : '동아일보'}</div>
+            </div>
+          </div>
+          <div class="acct-dropdown-divider"></div>
+          <a href="#dashboard" class="acct-dropdown-row" id="acct-mypage-btn"><span class="acct-row-icon">📊</span><span>내 현황</span></a>
+          <a href="#" class="acct-dropdown-row" id="acct-profile-btn"><span class="acct-row-icon">⚙️</span><span>개인정보설정</span></a>
+          <div class="acct-dropdown-divider"></div>
+          <a href="#" class="acct-dropdown-row" id="logout-btn"><span class="acct-row-icon">⏻</span><span>로그아웃</span></a>
+        </div>
+      </div>
     `;
+    const acctWrap = document.getElementById('acct-wrap');
+    const acctTrigger = document.getElementById('acct-trigger');
+    acctTrigger.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      acctWrap.classList.toggle('open');
+    });
+    document.getElementById('acct-mypage-btn').addEventListener('click', ()=>{
+      acctWrap.classList.remove('open');
+    });
+    document.getElementById('acct-profile-btn').addEventListener('click', (e)=>{
+      e.preventDefault();
+      acctWrap.classList.remove('open');
+      if(typeof openProfileModal === 'function') openProfileModal();
+    });
     document.getElementById('logout-btn').addEventListener('click', (e)=>{
       e.preventDefault();
-      localStorage.removeItem('px_user');
-      if(window.google && google.accounts) google.accounts.id.disableAutoSelect();
+      const token = user.token;
+      clearSession();
       renderUserState(null);
+      renderRoster();
+      renderDashboard();
+      if(token) apiPost('logout', { token }).catch(()=>{});
     });
   } else {
     cta.innerHTML = `
-      <div id="g_id_signin"></div>
+      <a href="#" class="btn btn-ghost btn-sm" id="login-btn">참가하기</a>
     `;
-    drawGoogleButton('g_id_signin');
+    document.getElementById('login-btn').addEventListener('click', (e)=>{
+      e.preventDefault();
+      openAuthModal('login');
+    });
   }
-  refreshApplyGate(user);
   if(typeof renderRoster === 'function') renderRoster();
   if(typeof renderDashboard === 'function') renderDashboard();
+  if(typeof renderMyPage === 'function') renderMyPage(user);
 }
 
-function drawGoogleButton(elId, attempt){
-  attempt = attempt || 0;
-  const el = document.getElementById(elId);
-  if(!el) return;
-  if(window.google && google.accounts && google.accounts.id){
-    google.accounts.id.renderButton(el, {
-      type: 'standard',
-      theme: 'outline',
-      size: 'medium',
-      shape: 'pill',
-      text: 'signin_with',
-      logo_alignment: 'left'
-    });
-  } else if(attempt < 20){
-    setTimeout(()=>drawGoogleButton(elId, attempt+1), 200);
-  } else {
-    el.innerHTML = '<span style="font-size:12px;color:var(--sub)">구글 로그인을 불러오지 못했어요. 새로고침 해주세요.</span>';
+document.addEventListener('click', (e)=>{
+  const acctWrap = document.getElementById('acct-wrap');
+  if(acctWrap && acctWrap.classList.contains('open') && !acctWrap.contains(e.target)){
+    acctWrap.classList.remove('open');
   }
+});
+
+/* ---- 인증 모달 (로그인 / 회원가입=참가신청) ---- */
+const authModalBackdrop = document.getElementById('auth-modal-backdrop');
+const authModalClose = document.getElementById('auth-modal-close');
+const authTabLogin = document.getElementById('auth-tab-login');
+const authTabSignup = document.getElementById('auth-tab-signup');
+const authLoginForm = document.getElementById('auth-login-form');
+const authSignupForm = document.getElementById('auth-signup-form');
+const authMsg = document.getElementById('auth-msg');
+
+function openAuthModal(tab){
+  if(!authModalBackdrop) return;
+  setAuthTab(tab || 'login');
+  if(authMsg) authMsg.textContent = '';
+  authModalBackdrop.classList.add('open');
+}
+function closeAuthModal(){
+  if(authModalBackdrop) authModalBackdrop.classList.remove('open');
+}
+function setAuthTab(tab){
+  const isLogin = tab === 'login';
+  if(authTabLogin) authTabLogin.classList.toggle('active', isLogin);
+  if(authTabSignup) authTabSignup.classList.toggle('active', !isLogin);
+  if(authLoginForm) authLoginForm.style.display = isLogin ? 'flex' : 'none';
+  if(authSignupForm) authSignupForm.style.display = isLogin ? 'none' : 'flex';
+  if(authMsg) authMsg.textContent = '';
+}
+authModalClose.addEventListener('click', closeAuthModal);
+authModalBackdrop.addEventListener('click', (e)=>{ if(e.target === authModalBackdrop) closeAuthModal(); });
+authTabLogin.addEventListener('click', ()=>setAuthTab('login'));
+authTabSignup.addEventListener('click', ()=>setAuthTab('signup'));
+
+function onAuthSuccess(res){
+  if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+  const user = Object.assign({}, res.user, { token: res.token });
+  saveSession(user);
+  renderUserState(user);
+  closeAuthModal();
+  loadAllData();
 }
 
-function findMyEntry(email){
-  if(!email) return null;
-  return rosterData.find(p => p.email && p.email === email) || null;
+authLoginForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if(!email || !password){ authMsg.style.color = 'var(--coral)'; authMsg.textContent = '이메일과 비밀번호를 입력해주세요.'; return; }
+  const btn = authLoginForm.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = '로그인 중...';
+  authMsg.style.color = 'var(--sub)'; authMsg.textContent = '';
+  apiPost('login', { email, password }).then(onAuthSuccess).catch(err=>{
+    authMsg.style.color = 'var(--coral)';
+    authMsg.textContent = err && err.message ? err.message : '로그인에 실패했어요.';
+  }).finally(()=>{ btn.disabled = false; btn.textContent = '로그인'; });
+});
+
+let signupPhotoData = null; // {base64, name, mime}
+const signupPhotoInput = document.getElementById('signup-photo');
+const signupPhotoPreview = document.getElementById('signup-photo-preview');
+if(signupPhotoInput){
+  signupPhotoInput.addEventListener('change', ()=>{
+    const file = signupPhotoInput.files[0];
+    signupPhotoData = null;
+    if(!file) return;
+    if(file.type.indexOf('image/') !== 0){
+      authMsg.style.color = 'var(--coral)'; authMsg.textContent = '프로필 사진은 이미지 파일만 가능해요.';
+      signupPhotoInput.value = ''; return;
+    }
+    if(file.size > 8*1024*1024){
+      authMsg.style.color = 'var(--coral)'; authMsg.textContent = '사진 파일이 너무 커요. 8MB 이하로 올려주세요.';
+      signupPhotoInput.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const dataUrl = reader.result;
+      signupPhotoData = { base64: dataUrl.split(',')[1], name: file.name, mime: file.type };
+      signupPhotoPreview.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">`;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
-function refreshApplyGate(user){
-  const gate = document.getElementById('apply-gate');
-  const authed = document.getElementById('apply-authed');
-  const fields = document.getElementById('apply-fields');
-  if(!gate || !fields) return;
+authSignupForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const password2 = document.getElementById('signup-password2').value;
+  const name = document.getElementById('signup-name').value.trim();
+  const phone = document.getElementById('signup-phone').value.trim();
+  const dept = document.getElementById('signup-dept').value.trim();
 
-  if(!user){
-    gate.style.display = 'flex';
-    authed.style.display = 'none';
-    fields.style.display = 'none';
+  if(!email.toLowerCase().endsWith(REQUIRED_EMAIL_DOMAIN)){
+    authMsg.style.color = 'var(--coral)'; authMsg.textContent = `회사 이메일(${REQUIRED_EMAIL_DOMAIN})로만 가입할 수 있어요.`; return;
+  }
+  if(!name || !dept){ authMsg.style.color = 'var(--coral)'; authMsg.textContent = '이름과 부서를 입력해주세요.'; return; }
+  if(password.length < 8){ authMsg.style.color = 'var(--coral)'; authMsg.textContent = '비밀번호는 8자 이상으로 설정해주세요.'; return; }
+  if(password !== password2){ authMsg.style.color = 'var(--coral)'; authMsg.textContent = '비밀번호가 서로 일치하지 않아요.'; return; }
+
+  const btn = authSignupForm.querySelector('button[type=submit]');
+  btn.disabled = true;
+  btn.textContent = signupPhotoData ? '사진 업로드 중...' : '신청하는 중...';
+  authMsg.style.color = 'var(--sub)'; authMsg.textContent = '';
+  apiPost('signup', {
+    email, password, name, phone, dept,
+    fileData: signupPhotoData ? signupPhotoData.base64 : '',
+    fileName: signupPhotoData ? signupPhotoData.name : '',
+    fileMime: signupPhotoData ? signupPhotoData.mime : ''
+  }).then(onAuthSuccess).catch(err=>{
+    authMsg.style.color = 'var(--coral)';
+    authMsg.textContent = err && err.message ? err.message : '참가 신청에 실패했어요.';
+  }).finally(()=>{ btn.disabled = false; btn.textContent = '참가신청'; });
+});
+
+function initAuth(){
+  const saved = getSavedSession();
+  if(!saved || !saved.token){
+    renderUserState(null);
     return;
   }
-
-  gate.style.display = 'none';
-  authed.style.display = 'flex';
-  fields.style.display = 'flex';
-  document.getElementById('apply-authed-text').textContent = `${user.name}님 (${user.email})으로 로그인됨`;
-
-  const nameInput = document.getElementById('apply-name');
-  const submitBtn = document.getElementById('apply-submit');
-  const msg = document.getElementById('apply-msg');
-  const existing = findMyEntry(user.email);
-
-  // 로그인해도 폼은 항상 빈칸 상태를 유지 (기존 신청 내용은 명단의 ✎ 버튼을 눌러야만 불러옴)
-  if(nameInput && !nameInput.value) nameInput.value = user.name;
-  if(submitBtn) submitBtn.textContent = '참여 신청하기';
-  if(msg){
-    if(existing){
-      msg.style.color = 'var(--sub)';
-      msg.textContent = '이미 신청하셨어요. 내용을 수정하려면 참여자 명단에서 ✎ 버튼을 눌러주세요.';
+  apiPost('whoami', { token: saved.token }).then(res=>{
+    if(res.ok && res.user){
+      const user = Object.assign({}, res.user, { token: saved.token });
+      saveSession(user);
+      renderUserState(user);
     } else {
-      msg.style.color = 'var(--sub)';
-      msg.textContent = '';
+      clearSession();
+      renderUserState(null);
     }
+  }).catch(()=>{
+    renderUserState(saved);
+  });
+}
+
+/* ---- 개인정보설정 (프로필 사진 / 연락처 / 비밀번호 변경) ---- */
+const profileModalBackdrop = document.getElementById('profile-modal-backdrop');
+const PROFILE_MAX_FILE_MB = 8;
+let profilePhotoData = null; // {base64, name, mime}
+
+function openProfileModal(){
+  const user = getSavedSession();
+  if(!user){ openAuthModal('login'); return; }
+  profilePhotoData = null;
+  document.getElementById('profile-photo-preview').innerHTML = avatarInner(user.photoUrl, user.name);
+  const fileInput = document.getElementById('profile-photo');
+  if(fileInput) fileInput.value = '';
+  document.getElementById('profile-phone').value = user.phone || '';
+  document.getElementById('profile-dept').value = user.dept || '';
+  document.getElementById('profile-password').value = '';
+  document.getElementById('profile-password2').value = '';
+  document.getElementById('profile-msg').textContent = '';
+  if(profileModalBackdrop) profileModalBackdrop.classList.add('open');
+}
+function closeProfileModal(){
+  if(profileModalBackdrop) profileModalBackdrop.classList.remove('open');
+}
+document.getElementById('profile-modal-close').addEventListener('click', closeProfileModal);
+profileModalBackdrop.addEventListener('click', (e)=>{ if(e.target===profileModalBackdrop) closeProfileModal(); });
+
+const profilePhotoInput = document.getElementById('profile-photo');
+if(profilePhotoInput){
+  profilePhotoInput.addEventListener('change', ()=>{
+    const file = profilePhotoInput.files[0];
+    const preview = document.getElementById('profile-photo-preview');
+    const msg = document.getElementById('profile-msg');
+    profilePhotoData = null;
+    if(!file) return;
+    if(file.type.indexOf('image/') !== 0){
+      msg.style.color = 'var(--coral)'; msg.textContent = '이미지 파일만 등록할 수 있어요.';
+      profilePhotoInput.value = ''; return;
+    }
+    if(file.size > PROFILE_MAX_FILE_MB*1024*1024){
+      msg.style.color = 'var(--coral)'; msg.textContent = `파일이 너무 커요. ${PROFILE_MAX_FILE_MB}MB 이하로 올려주세요.`;
+      profilePhotoInput.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const dataUrl = reader.result;
+      const base64 = dataUrl.split(',')[1];
+      profilePhotoData = { base64, name: file.name, mime: file.type };
+      preview.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">`;
+      msg.textContent = '';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('profile-form').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const user = getSavedSession();
+  if(!user) return;
+  const msg = document.getElementById('profile-msg');
+  const phone = document.getElementById('profile-phone').value.trim();
+  const dept = document.getElementById('profile-dept').value.trim();
+  const password = document.getElementById('profile-password').value;
+  const password2 = document.getElementById('profile-password2').value;
+
+  if(!dept){ msg.style.color = 'var(--coral)'; msg.textContent = '부서명을 입력해주세요.'; return; }
+  if(password || password2){
+    if(password.length < 8){ msg.style.color = 'var(--coral)'; msg.textContent = '새 비밀번호는 8자 이상으로 설정해주세요.'; return; }
+    if(password !== password2){ msg.style.color = 'var(--coral)'; msg.textContent = '새 비밀번호가 서로 일치하지 않아요.'; return; }
   }
-}
 
-function handleCredentialResponse(response){
-  const profile = parseJwt(response.credential);
-  const user = { name: profile.name, email: profile.email, picture: profile.picture };
-  localStorage.setItem('px_user', JSON.stringify(user));
-  renderUserState(user);
-}
+  const btn = document.getElementById('profile-submit-btn');
+  btn.disabled = true; btn.textContent = '저장하는 중...';
+  msg.style.color = 'var(--sub)'; msg.textContent = '';
 
-function initGoogle(attempt){
-  attempt = attempt || 0;
-  if(window.google && google.accounts && google.accounts.id){
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse,
-      auto_select: false,
-      use_fedcm_for_prompt: true
-    });
-    drawGoogleButton('g_id_signin_apply');
-    const saved = localStorage.getItem('px_user');
-    renderUserState(saved ? JSON.parse(saved) : null);
-  } else if(attempt < 20){
-    setTimeout(()=>initGoogle(attempt+1), 200);
-  } else {
-    renderUserState(null);
+  const payload = { phone, dept, token: user.token };
+  if(password) payload.newPassword = password;
+  if(profilePhotoData){
+    payload.fileData = profilePhotoData.base64;
+    payload.fileName = profilePhotoData.name;
+    payload.fileMime = profilePhotoData.mime;
   }
-}
 
-// window 'load'는 이미지/폰트 등 모든 리소스가 끝날 때까지 기다려서 체감 로그인 속도를 늦추므로,
-// 스크립트가 실행되는 시점(DOM 파싱 완료 시점)에 바로 시작
-initGoogle();
+  apiPost('updateProfile', payload).then(res=>{
+    if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+    membersData = res.members || membersData;
+    const updatedUser = Object.assign({}, user, res.user);
+    saveSession(updatedUser);
+    renderUserState(updatedUser);
+    if(currentItemId) renderModal();
+    msg.style.color = '#0F9D74'; msg.textContent = '저장됐어요.';
+    setTimeout(closeProfileModal, 700);
+  }).catch(err=>{
+    console.error('profile update failed', err);
+    msg.style.color = 'var(--coral)';
+    msg.textContent = err && err.message ? err.message : '저장에 실패했어요. 잠시 후 다시 시도해주세요.';
+  }).finally(()=>{
+    btn.disabled = false; btn.textContent = '저장하기';
+  });
+});
 
 /* ---- 맨 위로 가기 버튼 ---- */
 (function(){
@@ -1643,6 +2525,10 @@ initGoogle();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 })();
+
+/* ---- 초기 로드 ---- */
+loadAllData();
+initAuth();
 </script>
 
 </body>
