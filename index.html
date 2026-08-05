@@ -375,9 +375,9 @@
   #upload-form textarea{min-height:72px;}
   #upload-form input[type=text]:focus, #upload-form textarea:focus{outline:none;border-color:var(--violet);}
   #upload-form input[type=file]{font-size:12.5px;color:var(--sub);font-family:inherit;}
-  #upload-preview, #project-file-preview{margin-top:4px;}
-  #upload-preview img, #project-file-preview img{max-height:150px;border-radius:var(--radius-sm);display:block;border:1px solid var(--line);}
-  #upload-preview .pf, #project-file-preview .pf{font-size:12.5px;color:var(--sub);font-weight:600;background:#F4F1FF;color:var(--violet);
+  #upload-preview{margin-top:4px;}
+  #upload-preview img{max-height:150px;border-radius:var(--radius-sm);display:block;border:1px solid var(--line);}
+  #upload-preview .pf{font-size:12.5px;color:var(--sub);font-weight:600;background:#F4F1FF;color:var(--violet);
     display:inline-block;padding:6px 12px;border-radius:999px;}
   .checkbox-row{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink);}
   .checkbox-row input[type=checkbox]{accent-color:var(--violet);width:16px;height:16px;}
@@ -490,8 +490,9 @@
   }
   .like-btn:hover{transform:translateY(-1px);}
   .like-btn.liked{color:#E8467C;background:#FFF0F5;border-color:#FFD1E2;}
-  .like-btn .like-emoji{font-size:15px;line-height:1;}
+  .like-btn .like-icon{width:15px;height:15px;flex-shrink:0;display:block;}
   .like-btn:disabled{opacity:.6;cursor:default;transform:none;}
+  .meta-heart{width:12px;height:12px;flex-shrink:0;vertical-align:-1px;margin-right:1px;}
   .modal-divider{border-top:1px solid var(--line);margin:0 28px 20px;}
   .modal-comments{padding:0 28px;}
   .modal-comments h4{font-size:14.5px;font-weight:700;margin:0 0 4px;}
@@ -657,6 +658,29 @@
   .icon-btn{background:none;border:none;color:var(--sub);cursor:pointer;font-size:15px;padding:4px 6px;}
   .icon-btn:hover{color:var(--coral);}
   .add-step{font-size:12.5px;color:var(--violet);background:none;border:none;cursor:pointer;font-weight:700;margin-top:4px;font-family:inherit;}
+
+  /* 다중 링크 입력 / 드래그앤드롭 다중 파일 첨부 */
+  .link-list{display:flex;flex-direction:column;gap:8px;}
+  .link-row{display:flex;gap:8px;align-items:center;}
+  .link-row input[type=text]{
+    flex:1;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);
+    font-size:14px;font-family:inherit;background:#fff;color:var(--ink);
+  }
+  .link-row input[type=text]:focus{outline:none;border-color:var(--violet);}
+  .dropzone{
+    border:1.5px dashed var(--line);border-radius:var(--radius-sm);padding:20px 14px;
+    text-align:center;cursor:pointer;transition:border-color .12s,background .12s;
+  }
+  .dropzone:hover, .dropzone.drag-over{border-color:var(--violet);background:#F9F8FF;}
+  .dropzone-text{margin:0;font-size:12.5px;font-weight:600;color:var(--sub);}
+  .attach-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .attach-chip{
+    display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+    color:var(--violet);background:#F4F1FF;padding:6px 10px 6px 12px;border-radius:999px;max-width:100%;
+  }
+  .attach-chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;}
+  .attach-chip-remove{background:none;border:none;color:var(--violet);cursor:pointer;font-size:13px;padding:0 2px;line-height:1;flex-shrink:0;}
+  .attach-chip-remove:hover{color:var(--coral);}
 
   .m-checklist{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:8px;}
   .m-checklist li{display:flex;align-items:center;gap:8px;font-size:13.5px;}
@@ -1003,13 +1027,18 @@
           <textarea id="archive-desc" rows="3" placeholder="어떤 프로젝트/자료인지, 왜 추천하는지 적어주세요." style="width:100%;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);font-size:14px;font-family:inherit;resize:vertical;"></textarea>
         </div>
         <div class="field">
-          <label class="field-label" for="archive-link">링크 (선택)</label>
-          <input type="text" id="archive-link" placeholder="예: https://...">
+          <label class="field-label">링크 (선택 · 최대 5개)</label>
+          <div class="link-list" id="archive-link-list"></div>
+          <button type="button" class="add-step" id="archive-add-link-btn">+ 링크 추가</button>
         </div>
         <div class="field">
-          <label class="field-label" for="archive-file">파일 첨부 (선택 · 20MB 이하)</label>
-          <input type="file" id="archive-file">
-          <div id="archive-file-preview"></div>
+          <label class="field-label">파일 첨부 (선택 · 최대 5개 · 20MB 이하)</label>
+          <div class="dropzone" id="archive-dropzone">
+            <p class="dropzone-text">파일을 끌어다 놓거나 클릭해서 선택하세요</p>
+            <input type="file" id="archive-file" multiple hidden>
+          </div>
+          <div class="attach-list" id="archive-attach-list"></div>
+          <p class="apply-note" id="archive-file-msg" style="margin-top:2px;color:var(--coral);"></p>
         </div>
         <p class="apply-note" id="archive-msg" style="margin-top:2px;"></p>
         <button type="submit" class="btn btn-primary" id="archive-submit-btn">올리기</button>
@@ -1167,14 +1196,18 @@
           <label class="checkbox-row"><input type="checkbox" id="project-completed"> 이미 완료한 프로젝트예요 (진행률 100%로 등록)</label>
         </div>
         <div class="field">
-          <label class="field-label" for="project-link">링크 (선택 · 결과물 URL)</label>
-          <input type="text" id="project-link" placeholder="예: https://...">
+          <label class="field-label">링크 (선택 · 결과물 URL · 최대 5개)</label>
+          <div class="link-list" id="project-link-list"></div>
+          <button type="button" class="add-step" id="project-add-link-btn">+ 링크 추가</button>
         </div>
         <div class="field">
-          <label class="field-label" for="project-file">파일 첨부 (선택 · 대부분의 파일 형식 지원 · 20MB 이하)</label>
-          <input type="file" id="project-file">
-          <div id="project-file-preview"></div>
-          <p id="project-existing-file-note" style="font-size:12px;color:var(--sub);margin:2px 0 0;display:none;">기존에 첨부된 파일이 있어요. 새 파일을 선택하면 교체돼요.</p>
+          <label class="field-label">파일 첨부 (선택 · 대부분의 파일 형식 지원 · 최대 5개 · 20MB 이하)</label>
+          <div class="dropzone" id="project-dropzone">
+            <p class="dropzone-text">파일을 끌어다 놓거나 클릭해서 선택하세요</p>
+            <input type="file" id="project-file" multiple hidden>
+          </div>
+          <div class="attach-list" id="project-attach-list"></div>
+          <p class="apply-note" id="project-file-msg" style="margin-top:2px;color:var(--coral);"></p>
         </div>
         <p class="apply-note" id="project-msg" style="margin-top:2px;"></p>
         <button type="submit" class="btn btn-primary" id="project-submit-btn">프로젝트 만들기</button>
@@ -1206,6 +1239,128 @@
     }
   });
 })();
+
+/* ---- 다중 링크 입력 관리 (프로젝트/아카이브 폼 공용) ---- */
+function makeLinkListManager(containerId, addBtnId, maxCount){
+  const container = document.getElementById(containerId);
+  const addBtn = document.getElementById(addBtnId);
+  maxCount = maxCount || 5;
+  function addRow(value){
+    if(container.querySelectorAll('.link-row').length >= maxCount) return;
+    const row = document.createElement('div');
+    row.className = 'link-row';
+    row.innerHTML = `<input type="text" placeholder="예: https://...">
+      <button type="button" class="icon-btn link-remove-btn">✕</button>`;
+    row.querySelector('input').value = value || '';
+    row.querySelector('.link-remove-btn').addEventListener('click', ()=>row.remove());
+    container.appendChild(row);
+  }
+  if(addBtn) addBtn.addEventListener('click', ()=>addRow(''));
+  return {
+    reset(values){
+      container.innerHTML = '';
+      const list = (values && values.length) ? values.slice(0, maxCount) : [''];
+      list.forEach(v=>addRow(v));
+    },
+    getValues(){
+      return [...container.querySelectorAll('.link-row input')].map(i=>i.value.trim()).filter(v=>v);
+    }
+  };
+}
+
+/* ---- 드래그앤드롭 + 클릭 다중 파일 첨부 관리 (프로젝트/아카이브 폼 공용) ---- */
+function makeAttachmentManager(opts){
+  const dropzone = document.getElementById(opts.dropzoneId);
+  const input = document.getElementById(opts.inputId);
+  const list = document.getElementById(opts.listId);
+  const msgEl = opts.msgId ? document.getElementById(opts.msgId) : null;
+  const maxCount = opts.maxCount || 5;
+  const maxSizeMB = opts.maxSizeMB || 20;
+  let kept = [];  // {url,type,name} 기존 첨부 (수정 시 유지)
+  let added = []; // {base64,name,mime} 새로 추가한 파일
+
+  function totalCount(){ return kept.length + added.length; }
+  function setMsg(text){ if(msgEl) msgEl.textContent = text || ''; }
+
+  function render(){
+    const items = kept.map((a,i)=>({kind:'kept', idx:i, name:a.name||'첨부파일'}))
+      .concat(added.map((f,i)=>({kind:'added', idx:i, name:f.name})));
+    list.innerHTML = items.map(it => `
+      <span class="attach-chip" data-kind="${it.kind}" data-idx="${it.idx}">
+        <span class="attach-chip-name">📄 ${escapeHtml(it.name)}</span>
+        <button type="button" class="attach-chip-remove" aria-label="제거">✕</button>
+      </span>
+    `).join('');
+    list.querySelectorAll('.attach-chip').forEach(chip=>{
+      chip.querySelector('.attach-chip-remove').addEventListener('click', ()=>{
+        const kind = chip.dataset.kind, idx = Number(chip.dataset.idx);
+        if(kind === 'kept') kept.splice(idx,1); else added.splice(idx,1);
+        render();
+      });
+    });
+  }
+
+  function addFiles(fileList){
+    setMsg('');
+    [...fileList].forEach(file=>{
+      if(totalCount() >= maxCount){ setMsg(`파일은 최대 ${maxCount}개까지 첨부할 수 있어요.`); return; }
+      if(file.size > maxSizeMB*1024*1024){ setMsg(`"${file.name}"이 너무 커요. ${maxSizeMB}MB 이하로 올려주세요.`); return; }
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        added.push({ base64: reader.result.split(',')[1], name: file.name, mime: file.type });
+        render();
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = '';
+  }
+
+  if(dropzone){
+    dropzone.addEventListener('click', ()=>input.click());
+    ['dragenter','dragover'].forEach(ev=>dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.add('drag-over'); }));
+    ['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.remove('drag-over'); }));
+    dropzone.addEventListener('drop', e=>{ if(e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+  }
+  if(input) input.addEventListener('change', ()=>{ if(input.files.length) addFiles(input.files); });
+
+  return {
+    reset(existing){
+      kept = Array.isArray(existing) ? existing.slice(0, maxCount) : [];
+      added = [];
+      setMsg('');
+      render();
+    },
+    getNewFiles(){ return added.map(f=>({ fileData: f.base64, fileName: f.name, fileMime: f.mime })); },
+    getKeptAttachments(){ return kept; },
+    hasAny(){ return totalCount() > 0; }
+  };
+}
+
+/* ---- 좋아요 하트 아이콘 (사이트 톤앤매너에 맞춘 라인/채움 SVG) ---- */
+function heartIconSvg(filled, size, cls){
+  size = size || 15;
+  cls = cls || 'like-icon';
+  if(filled){
+    return `<svg class="${cls}" viewBox="0 0 24 24" width="${size}" height="${size}" fill="currentColor"><path d="M12 21s-6.7-4.2-9.3-8.1C.8 10 1.2 6.4 4 4.6c2.3-1.5 5-.9 6.7 1.1L12 7l1.3-1.3c1.7-2 4.4-2.6 6.7-1.1 2.8 1.8 3.2 5.4 1.3 8.3C18.7 16.8 12 21 12 21z"/></svg>`;
+  }
+  return `<svg class="${cls}" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.7-4.2-9.3-8.1C.8 10 1.2 6.4 4 4.6c2.3-1.5 5-.9 6.7 1.1L12 7l1.3-1.3c1.7-2 4.4-2.6 6.7-1.1 2.8 1.8 3.2 5.4 1.3 8.3C18.7 16.8 12 21 12 21z"/></svg>`;
+}
+// 프로젝트/아카이브 카드에 링크·첨부파일 뱃지를 표시할지 여부 (다중 링크/파일 배열 기준)
+function hasAttachOrLink(x){
+  return !!((x.links && x.links.length) || (x.attachments && x.attachments.length));
+}
+// 상세 모달에 링크/첨부파일 버튼들을 여러 개 나란히 렌더링 (다중 링크/파일 지원)
+function linksAttachmentsHtml(item, linkLabel, fileLabel){
+  const links = item.links || [];
+  const attachments = item.attachments || [];
+  const linkHtml = links.map((l,i) =>
+    `<a href="${escapeHtml(l)}" target="_blank" rel="noopener" class="modal-link">${linkLabel}${links.length>1 ? ' '+(i+1) : ''} ↗</a>`
+  ).join('');
+  const fileHtml = attachments.map((a,i) =>
+    `<a href="${escapeHtml(a.url)}" target="_blank" rel="noopener" class="modal-link">${fileLabel}${attachments.length>1 ? ' '+(i+1) : ''} ↗</a>`
+  ).join('');
+  return linkHtml + fileHtml;
+}
 
 const COLORS = ["#6C5CE7","#3AC6F0","#00D2A0","#FF6F5E","#FF6FA5","#FFC33C"];
 function avatarColor(i){return COLORS[i % COLORS.length];}
@@ -1319,7 +1474,7 @@ function likeButtonHtml(targetType, targetId){
   const liked = isLikedByMe(targetType, targetId);
   const count = getLikeCount(targetType, targetId);
   return `<button type="button" class="like-btn${liked ? ' liked' : ''}" data-like-type="${targetType}" data-like-id="${targetId}">
-    <span class="like-emoji">${liked ? '❤️' : '🤍'}</span><span class="like-count">${count}</span>
+    ${heartIconSvg(liked)}<span class="like-count">${count}</span>
   </button>`;
 }
 function wireLikeButton(container, onDone){
@@ -1482,9 +1637,9 @@ function projectCardHtml(p, idx){
     <div class="g-card project-card" data-project-id="${p.id}">
       <div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>
       <div class="g-body">
-        <span class="g-tag">#${p.topic || ''}${(p.link || p.fileUrl) ? ' · 📎 첨부' : ''}</span>
+        <span class="g-tag">#${p.topic || ''}${hasAttachOrLink(p) ? ' · 📎 첨부' : ''}</span>
         <p class="g-title">${p.title}</p>
-        <div class="g-meta"><span>${author ? author.name : ''}</span><span>❤️ ${getLikeCount('프로젝트', p.id)} · 💬 ${getComments(p.id).length}</span></div>
+        <div class="g-meta"><span>${author ? author.name : ''}</span><span>${heartIconSvg(false,12,'meta-heart')} ${getLikeCount('프로젝트', p.id)} · 💬 ${getComments(p.id).length}</span></div>
         <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
         <div class="p-bottom"><span class="stage">${pct>=100?'완료':pct+'% 진행 중'}</span><span>${pct}%</span></div>
       </div>
@@ -1523,9 +1678,9 @@ function archiveCardHtml(item, idx){
     <div class="g-card archive-card" data-archive-id="${item.id}">
       <div class="g-thumb" style="background:${avatarColor(idx)}">${icon}</div>
       <div class="g-body">
-        <span class="g-tag">#${item.type}${(item.link || item.fileUrl) ? ' · 첨부' : ''}</span>
+        <span class="g-tag">#${item.type}${hasAttachOrLink(item) ? ' · 첨부' : ''}</span>
         <p class="g-title">${item.title}</p>
-        <div class="g-meta"><span>${author ? author.name : ''}</span><span>❤️ ${getLikeCount('아카이브', item.id)} · 💬 ${getComments(item.id).length}</span></div>
+        <div class="g-meta"><span>${author ? author.name : ''}</span><span>${heartIconSvg(false,12,'meta-heart')} ${getLikeCount('아카이브', item.id)} · 💬 ${getComments(item.id).length}</span></div>
       </div>
     </div>
   `;
@@ -1575,8 +1730,7 @@ function openArchiveDetail(id){
         </div>
       </div>
       <p class="modal-desc">${item.desc ? escapeHtml(item.desc) : '설명이 없어요.'}</p>
-      ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener" class="modal-link">바로가기 ↗</a>` : ''}
-      ${item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" rel="noopener" class="modal-link">첨부파일 보기 ↗</a>` : ''}
+      ${linksAttachmentsHtml(item, '바로가기', '첨부파일 보기')}
       <div>${likeButtonHtml('아카이브', item.id)}</div>
       ${isMine ? `<div class="owner-actions"><button type="button" class="btn btn-ghost btn-sm" id="archive-delete-btn" style="color:var(--coral);">삭제</button></div>` : ''}
     </div>
@@ -1657,8 +1811,11 @@ archiveDetailModalBackdrop.addEventListener('click', (e)=>{ if(e.target===archiv
 
 /* ---- 아카이브 올리기 모달 ---- */
 const archiveModalBackdrop = document.getElementById('archive-modal-backdrop');
-const ARCHIVE_MAX_FILE_MB = 20;
-let archiveFileData = null;
+const archiveLinkManager = makeLinkListManager('archive-link-list', 'archive-add-link-btn', 5);
+const archiveAttachManager = makeAttachmentManager({
+  dropzoneId: 'archive-dropzone', inputId: 'archive-file', listId: 'archive-attach-list',
+  msgId: 'archive-file-msg', maxCount: 5, maxSizeMB: 20
+});
 
 function openArchiveModal(){
   const user = getSavedSession();
@@ -1666,11 +1823,8 @@ function openArchiveModal(){
   document.getElementById('archive-type').value = archiveTypesData[0] || '프로젝트';
   document.getElementById('archive-title').value = '';
   document.getElementById('archive-desc').value = '';
-  document.getElementById('archive-link').value = '';
-  archiveFileData = null;
-  const fileInput = document.getElementById('archive-file');
-  if(fileInput) fileInput.value = '';
-  document.getElementById('archive-file-preview').innerHTML = '';
+  archiveLinkManager.reset([]);
+  archiveAttachManager.reset([]);
   document.getElementById('archive-msg').textContent = '';
   if(archiveModalBackdrop) archiveModalBackdrop.classList.add('open');
 }
@@ -1681,34 +1835,6 @@ document.getElementById('archive-new-btn').addEventListener('click', (e)=>{ e.pr
 document.getElementById('archive-modal-close').addEventListener('click', closeArchiveModal);
 archiveModalBackdrop.addEventListener('click', (e)=>{ if(e.target===archiveModalBackdrop) closeArchiveModal(); });
 
-const archiveFileInput = document.getElementById('archive-file');
-if(archiveFileInput){
-  archiveFileInput.addEventListener('change', ()=>{
-    const file = archiveFileInput.files[0];
-    const preview = document.getElementById('archive-file-preview');
-    archiveFileData = null;
-    preview.innerHTML = '';
-    if(!file) return;
-    if(file.size > ARCHIVE_MAX_FILE_MB*1024*1024){
-      preview.innerHTML = `<p style="font-size:12px;color:var(--coral);margin:6px 0 0;">파일이 너무 커요. ${ARCHIVE_MAX_FILE_MB}MB 이하로 올려주세요.</p>`;
-      archiveFileInput.value = '';
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      const dataUrl = reader.result;
-      const base64 = dataUrl.split(',')[1];
-      archiveFileData = { base64, name: file.name, mime: file.type };
-      if(file.type.indexOf('image/') === 0){
-        preview.innerHTML = `<img src="${dataUrl}" alt="미리보기" style="max-height:120px;border-radius:var(--radius-sm);display:block;margin-top:6px;border:1px solid var(--line);">`;
-      } else {
-        preview.innerHTML = `<span class="pf">📄 ${file.name}</span>`;
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 document.getElementById('archive-form').addEventListener('submit', (e)=>{
   e.preventDefault();
   const user = getSavedSession();
@@ -1716,23 +1842,19 @@ document.getElementById('archive-form').addEventListener('submit', (e)=>{
   const type = document.getElementById('archive-type').value;
   const title = document.getElementById('archive-title').value.trim();
   const desc = document.getElementById('archive-desc').value.trim();
-  const link = document.getElementById('archive-link').value.trim();
+  const links = archiveLinkManager.getValues();
+  const files = archiveAttachManager.getNewFiles();
   const msg = document.getElementById('archive-msg');
   if(!title){ msg.style.color = 'var(--coral)'; msg.textContent = '제목을 입력해주세요.'; return; }
-  if(!link && !archiveFileData){ msg.style.color = 'var(--coral)'; msg.textContent = '링크 또는 파일 중 하나는 꼭 넣어주세요.'; return; }
+  if(!links.length && !files.length){ msg.style.color = 'var(--coral)'; msg.textContent = '링크 또는 파일 중 하나는 꼭 넣어주세요.'; return; }
 
   const btn = document.getElementById('archive-submit-btn');
   btn.disabled = true;
-  btn.textContent = archiveFileData ? '업로드 중...' : '올리는 중...';
+  btn.textContent = files.length ? '업로드 중...' : '올리는 중...';
   msg.style.color = 'var(--sub)';
-  msg.textContent = archiveFileData ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
+  msg.textContent = files.length ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
 
-  apiPost('addArchiveItem', {
-    type, title, desc, link, token: user.token,
-    fileData: archiveFileData ? archiveFileData.base64 : '',
-    fileName: archiveFileData ? archiveFileData.name : '',
-    fileMime: archiveFileData ? archiveFileData.mime : ''
-  }).then(res=>{
+  apiPost('addArchiveItem', { type, title, desc, links, files, token: user.token }).then(res=>{
     if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
     upsertArchiveItem(res.item);
     closeArchiveModal();
@@ -1805,8 +1927,7 @@ function renderModal(){
       <p class="modal-desc">${item.goal ? escapeHtml(item.goal) : ''}</p>
       <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
       <div class="p-bottom"><span class="stage">${pct>=100?'완료':pct+'% 진행 중'}</span><span>${pct}%</span></div>
-      ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener" class="modal-link">결과물 바로가기 ↗</a>` : ''}
-      ${item.fileUrl ? `<a href="${item.fileUrl}" target="_blank" rel="noopener" class="modal-link">첨부파일 보기 ↗</a>` : ''}
+      ${linksAttachmentsHtml(item, '결과물 바로가기', '첨부파일 보기')}
       <div>${likeButtonHtml('프로젝트', item.id)}</div>
     </div>
     <div class="modal-divider"></div>
@@ -1981,7 +2102,7 @@ function myProjectCardHtml(p, idx){
     <div class="g-card project-card" data-project-id="${p.id}">
       <div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>
       <div class="g-body">
-        <span class="g-tag">#${p.topic || ''}${(p.link || p.fileUrl) ? ' · 📎 첨부' : ''}</span>
+        <span class="g-tag">#${p.topic || ''}${hasAttachOrLink(p) ? ' · 📎 첨부' : ''}</span>
         <p class="g-title">${p.title}</p>
         <div class="g-meta"><span>${(p.steps||[]).filter(s=>s.done).length}/${(p.steps||[]).length} 단계 완료</span><span>${getLogs(p.id).length}개 기록</span></div>
         <div class="p-bar-track"><div class="p-bar-fill" style="width:${pct}%"></div></div>
@@ -2059,9 +2180,12 @@ function renderMyPage(user){
 /* ---- 프로젝트 생성/수정 모달 ---- */
 const projectModalBackdrop = document.getElementById('project-modal-backdrop');
 const projectStepsList = document.getElementById('project-steps-list');
-const PROJECT_MAX_FILE_MB = 20;
 let editingProjectId = null;
-let projectFileData = null; // {base64, name, mime}
+const projectLinkManager = makeLinkListManager('project-link-list', 'project-add-link-btn', 5);
+const projectAttachManager = makeAttachmentManager({
+  dropzoneId: 'project-dropzone', inputId: 'project-file', listId: 'project-attach-list',
+  msgId: 'project-file-msg', maxCount: 5, maxSizeMB: 20
+});
 
 function populateTopicSelect(){
   const sel = document.getElementById('project-topic');
@@ -2078,34 +2202,6 @@ function addProjectStepRow(text, done){
 }
 document.getElementById('project-add-step-btn').addEventListener('click', ()=>addProjectStepRow('', false));
 
-const projectFileInput = document.getElementById('project-file');
-if(projectFileInput){
-  projectFileInput.addEventListener('change', ()=>{
-    const file = projectFileInput.files[0];
-    const preview = document.getElementById('project-file-preview');
-    projectFileData = null;
-    preview.innerHTML = '';
-    if(!file) return;
-    if(file.size > PROJECT_MAX_FILE_MB*1024*1024){
-      preview.innerHTML = `<p style="font-size:12px;color:var(--coral);margin:6px 0 0;">파일이 너무 커요. ${PROJECT_MAX_FILE_MB}MB 이하로 올려주세요.</p>`;
-      projectFileInput.value = '';
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      const dataUrl = reader.result;
-      const base64 = dataUrl.split(',')[1];
-      projectFileData = { base64, name: file.name, mime: file.type };
-      if(file.type.indexOf('image/') === 0){
-        preview.innerHTML = `<img src="${dataUrl}" alt="미리보기">`;
-      } else {
-        preview.innerHTML = `<span class="pf">📄 ${file.name}</span>`;
-      }
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 function openProjectModal(projectId){
   const user = getSavedSession();
   if(!user){ openAuthModal('login'); return; }
@@ -2118,16 +2214,12 @@ function openProjectModal(projectId){
   document.getElementById('project-msg').textContent = '';
   document.getElementById('project-title').value = editing ? editing.title : '';
   document.getElementById('project-goal').value = editing ? (editing.goal||'') : '';
-  document.getElementById('project-link').value = editing ? (editing.link||'') : '';
   document.getElementById('project-completed').checked = editing ? (editing.progress >= 100) : false;
   populateTopicSelect();
   if(editing) document.getElementById('project-topic').value = editing.topic || topicsData[0];
 
-  projectFileData = null;
-  if(projectFileInput) projectFileInput.value = '';
-  document.getElementById('project-file-preview').innerHTML = '';
-  const existingNote = document.getElementById('project-existing-file-note');
-  existingNote.style.display = (editing && editing.fileUrl) ? 'block' : 'none';
+  projectLinkManager.reset(editing ? (editing.links||[]) : []);
+  projectAttachManager.reset(editing ? (editing.attachments||[]) : []);
 
   projectStepsList.innerHTML = '';
   if(editing && (editing.steps||[]).length){
@@ -2157,23 +2249,23 @@ document.getElementById('project-form').addEventListener('submit', (e)=>{
     .filter(s => s.text);
   const topic = document.getElementById('project-topic').value;
   const goal = document.getElementById('project-goal').value.trim();
-  const link = document.getElementById('project-link').value.trim();
+  const links = projectLinkManager.getValues();
+  const files = projectAttachManager.getNewFiles();
+  const keepAttachments = projectAttachManager.getKeptAttachments();
   const completed = document.getElementById('project-completed').checked;
 
   const btn = document.getElementById('project-submit-btn');
   btn.disabled = true;
-  btn.textContent = projectFileData ? '파일 업로드 중...' : (editingProjectId ? '수정하는 중...' : '만드는 중...');
+  btn.textContent = files.length ? '파일 업로드 중...' : (editingProjectId ? '수정하는 중...' : '만드는 중...');
   msg.style.color = 'var(--sub)';
-  msg.textContent = projectFileData ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
+  msg.textContent = files.length ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
 
   const action = editingProjectId ? 'updateProjectInfo' : 'createProject';
-  const payload = {
-    title, topic, goal, steps, link, completed, token: user.token,
-    fileData: projectFileData ? projectFileData.base64 : '',
-    fileName: projectFileData ? projectFileData.name : '',
-    fileMime: projectFileData ? projectFileData.mime : ''
-  };
-  if(editingProjectId) payload.projectId = editingProjectId;
+  const payload = { title, topic, goal, steps, links, files, completed, token: user.token };
+  if(editingProjectId){
+    payload.projectId = editingProjectId;
+    payload.keepAttachments = keepAttachments;
+  }
 
   apiPost(action, payload).then(res=>{
     if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
