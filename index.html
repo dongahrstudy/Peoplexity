@@ -505,6 +505,23 @@
   }
   .comment-form input[type=text]:focus{outline:none;border-color:var(--violet);}
   .comment-gate{font-size:12.5px;color:var(--sub);font-weight:600;padding-top:14px;border-top:1px solid var(--line);}
+  .comment-actions{display:flex;gap:10px;margin-top:5px;}
+  .comment-edit-btn, .comment-delete-btn{
+    background:none;border:none;padding:0;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--sub);
+  }
+  .comment-edit-btn:hover{color:var(--violet);}
+  .comment-delete-btn:hover{color:var(--coral);}
+  .comment-edit-row{display:flex;gap:8px;align-items:center;margin-top:6px;}
+  .comment-edit-row input[type=text]{
+    flex:1;padding:7px 12px;border-radius:999px;border:1.5px solid var(--line);
+    font-size:13px;font-family:inherit;
+  }
+  .comment-edit-row input[type=text]:focus{outline:none;border-color:var(--violet);}
+  .comment-save-btn, .comment-cancel-btn{
+    background:none;border:none;padding:4px 6px;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--sub);white-space:nowrap;
+  }
+  .comment-save-btn{color:var(--violet);}
+  .comment-cancel-btn:hover{color:var(--coral);}
 
   /* schedule */
   .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
@@ -735,6 +752,7 @@
       <a href="#dashboard">현황</a>
       <a href="#gallery">프로젝트</a>
       <a href="#archive">아카이브</a>
+      <a href="#board">자유게시판</a>
     </nav>
     <div class="nav-cta" id="nav-cta">
       <a href="#" class="btn btn-ghost btn-sm" id="login-btn">참가하기</a>
@@ -1005,12 +1023,33 @@
   </div>
 </section>
 
+<section id="board">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <span class="tag">BOARD</span>
+        <h2>자유게시판</h2>
+        <p>학습하며 느낀 점, 질문, 자유로운 의견을 편하게 나눠보세요.</p>
+      </div>
+      <a href="#" class="btn btn-primary btn-sm" id="board-new-btn">+ 글쓰기</a>
+    </div>
+    <div class="filter-pills" id="board-filters">
+      <span class="fpill active" data-f="all">전체</span>
+      <span class="fpill" data-f="건의">건의</span>
+      <span class="fpill" data-f="잡담">잡담</span>
+      <span class="fpill" data-f="질문">질문</span>
+      <span class="fpill" data-f="기타">기타</span>
+    </div>
+    <div class="grid-3" id="board-cards"></div>
+  </div>
+</section>
+
 <div class="modal-backdrop" id="archive-modal-backdrop">
   <div class="modal-box" id="archive-modal-box" style="max-width:520px;">
     <button type="button" class="modal-close" id="archive-modal-close" aria-label="닫기">✕</button>
     <div class="modal-body" style="padding:30px 28px 26px;">
-      <span class="modal-tag">ARCHIVE</span>
-      <h3 class="modal-title" style="margin:0 0 16px;">아카이브에 올리기</h3>
+      <span class="modal-tag" id="archive-modal-tag">ARCHIVE</span>
+      <h3 class="modal-title" id="archive-modal-title" style="margin:0 0 16px;">아카이브에 올리기</h3>
       <form id="archive-form" style="display:flex;flex-direction:column;gap:14px;">
         <div class="field">
           <label class="field-label">유형</label>
@@ -1033,7 +1072,7 @@
           <button type="button" class="add-step" id="archive-add-link-btn">+ 링크 추가</button>
         </div>
         <div class="field">
-          <label class="field-label">파일 첨부 (선택 · 최대 5개 · 20MB 이하)</label>
+          <label class="field-label">파일 첨부 (선택 · 최대 3개 · 8MB 이하)</label>
           <div class="dropzone" id="archive-dropzone">
             <p class="dropzone-text">파일을 끌어다 놓거나 클릭해서 선택하세요</p>
             <input type="file" id="archive-file" multiple hidden>
@@ -1052,6 +1091,44 @@
   <div class="modal-box" id="archive-detail-modal-box" style="max-width:480px;">
     <button type="button" class="modal-close" id="archive-detail-modal-close" aria-label="닫기">✕</button>
     <div id="archive-detail-content"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="board-modal-backdrop">
+  <div class="modal-box" id="board-modal-box" style="max-width:520px;">
+    <button type="button" class="modal-close" id="board-modal-close" aria-label="닫기">✕</button>
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag" id="board-modal-tag">BOARD</span>
+      <h3 class="modal-title" id="board-modal-title" style="margin:0 0 16px;">자유게시판 글쓰기</h3>
+      <form id="board-form" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="field">
+          <label class="field-label">카테고리</label>
+          <select id="board-category">
+            <option value="건의">건의</option>
+            <option value="잡담">잡담</option>
+            <option value="질문">질문</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="board-title">제목</label>
+          <input type="text" id="board-title" placeholder="예: 이번 주 학습하면서 느낀 점" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="board-content">내용</label>
+          <textarea id="board-content" rows="6" placeholder="자유롭게 의견을 남겨주세요." style="width:100%;padding:11px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--line);font-size:14px;font-family:inherit;resize:vertical;" required></textarea>
+        </div>
+        <p class="apply-note" id="board-msg" style="margin-top:2px;"></p>
+        <button type="submit" class="btn btn-primary" id="board-submit-btn">등록하기</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="board-detail-modal-backdrop">
+  <div class="modal-box" id="board-detail-modal-box" style="max-width:480px;">
+    <button type="button" class="modal-close" id="board-detail-modal-close" aria-label="닫기">✕</button>
+    <div id="board-detail-content"></div>
   </div>
 </div>
 
@@ -1090,6 +1167,7 @@
           <input type="password" id="login-password" placeholder="비밀번호" required>
         </div>
         <button type="submit" class="btn btn-primary">로그인</button>
+        <a href="#" id="forgot-password-link" style="font-size:12.5px;color:var(--sub);text-align:center;text-decoration:underline;">비밀번호를 잊으셨나요? (처음 로그인하시는 분도 클릭)</a>
       </form>
 
       <form id="auth-signup-form" style="display:none;flex-direction:column;gap:14px;">
@@ -1202,7 +1280,7 @@
           <button type="button" class="add-step" id="project-add-link-btn">+ 링크 추가</button>
         </div>
         <div class="field">
-          <label class="field-label">파일 첨부 (선택 · 대부분의 파일 형식 지원 · 최대 5개 · 20MB 이하)</label>
+          <label class="field-label">파일 첨부 (선택 · 대부분의 파일 형식 지원 · 최대 3개 · 8MB 이하)</label>
           <div class="dropzone" id="project-dropzone">
             <p class="dropzone-text">파일을 끌어다 놓거나 클릭해서 선택하세요</p>
             <input type="file" id="project-file" multiple hidden>
@@ -1269,6 +1347,39 @@ function makeLinkListManager(containerId, addBtnId, maxCount){
   };
 }
 
+/* ---- 업로드 전 이미지 압축 ----
+   2026-08-05: 동시접속·업로드가 몰릴 때 큰 사진 파일이 느린 응답/타임아웃의 주요 원인이라,
+   이미지는 업로드 전에 가로/세로 1600px, JPEG 품질 82%로 줄여서 전송 용량을 크게 낮춘다.
+   이미지가 아니거나(움직이는 GIF 포함) 압축 결과가 오히려 더 크면 원본 파일을 그대로 사용한다. */
+function compressImageFile(file, maxDim, quality){
+  return new Promise((resolve)=>{
+    if(!file || !file.type || file.type.indexOf('image/') !== 0 || file.type === 'image/gif'){
+      resolve(file); return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      URL.revokeObjectURL(url);
+      let width = img.naturalWidth, height = img.naturalHeight;
+      const dim = maxDim || 1600;
+      if(width > dim || height > dim){
+        const scale = dim / Math.max(width, height);
+        width = Math.round(width*scale); height = Math.round(height*scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob)=>{
+        if(!blob || blob.size >= file.size){ resolve(file); return; }
+        resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality || 0.82);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
 /* ---- 드래그앤드롭 + 클릭 다중 파일 첨부 관리 (프로젝트/아카이브 폼 공용) ---- */
 function makeAttachmentManager(opts){
   const dropzone = document.getElementById(opts.dropzoneId);
@@ -1301,18 +1412,25 @@ function makeAttachmentManager(opts){
     });
   }
 
-  function addFiles(fileList){
-    setMsg('');
-    [...fileList].forEach(file=>{
-      if(totalCount() >= maxCount){ setMsg(`파일은 최대 ${maxCount}개까지 첨부할 수 있어요.`); return; }
-      if(file.size > maxSizeMB*1024*1024){ setMsg(`"${file.name}"이 너무 커요. ${maxSizeMB}MB 이하로 올려주세요.`); return; }
-      const reader = new FileReader();
-      reader.onload = ()=>{
-        added.push({ base64: reader.result.split(',')[1], name: file.name, mime: file.type });
-        render();
-      };
-      reader.readAsDataURL(file);
-    });
+  async function addFiles(fileList){
+    let errorMsg = '';
+    for(const rawFile of [...fileList]){
+      if(totalCount() >= maxCount){ errorMsg = `파일은 최대 ${maxCount}개까지 첨부할 수 있어요.`; break; }
+      setMsg(rawFile.type.indexOf('image/') === 0 ? '사진을 압축하고 있어요...' : '');
+      const file = await compressImageFile(rawFile, 1600, 0.82);
+      if(file.size > maxSizeMB*1024*1024){ errorMsg = `"${file.name}"이 너무 커요. ${maxSizeMB}MB 이하로 올려주세요.`; continue; }
+      await new Promise(resolve=>{
+        const reader = new FileReader();
+        reader.onload = ()=>{
+          added.push({ base64: reader.result.split(',')[1], name: file.name, mime: file.type });
+          render();
+          resolve();
+        };
+        reader.onerror = ()=>resolve();
+        reader.readAsDataURL(file);
+      });
+    }
+    setMsg(errorMsg);
     input.value = '';
   }
 
@@ -1392,18 +1510,18 @@ function formatRelative(iso){
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
 
-/* ---- 백엔드 연결 (Apps Script) ---- */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrD07FTte1rX9DXBCXFqU1JXgNNMB5irXy_VBTdqlhj76ikU3t8Q1WZTwf5_Raep0H/exec';
-
+/* ---- 백엔드 연결 (Firebase 프로토타입) ----
+   apiGet(type)/apiPost(action,payload)는 이전과 완전히 같은 이름·같은 호출 규칙으로 남겨두고,
+   실제 구현은 이 파일 맨 아래 <script type="module"> 블록(Firebase 어댑터)에서
+   window.apiGet / window.apiPost 로 등록한다. 이렇게 하면 위·아래 나머지 모든 화면 로직
+   (렌더링/모달/버튼 이벤트 등)은 단 한 줄도 안 바꿔도 그대로 동작한다.
+   (아래 함수들은 모듈 스크립트가 아직 로드되기 전에 실수로 호출되는 것을 막기 위한 안전장치일 뿐,
+   실제로는 모듈 스크립트가 이 이름들을 덮어쓴다.) */
 function apiGet(type){
-  return fetch(`${APPS_SCRIPT_URL}?type=${type}`).then(r => r.json());
+  return Promise.reject(new Error('Firebase 초기화 중이에요. 잠시 후 다시 시도해주세요.'));
 }
 function apiPost(action, payload){
-  return fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, payload })
-  }).then(r => r.json());
+  return Promise.reject(new Error('Firebase 초기화 중이에요. 잠시 후 다시 시도해주세요.'));
 }
 
 /* ---- 시즌 일정 (전체 진행률 배지는 참여자 체크와 무관하게 실제 달력 날짜 기준) ---- */
@@ -1423,9 +1541,92 @@ let commentsData = [];
 let archiveData = [];
 let archiveTypesData = ['프로젝트', '자료'];
 let likesData = [];
+let boardPostsData = [];
 
 function getComments(projectId){
   return commentsData.filter(c => c.itemId == projectId);
+}
+
+/* ---- 댓글 렌더링 + 본인 댓글 수정/삭제 (프로젝트 상세/아카이브 상세 공용) ---- */
+function commentListHtml(comments, savedUser){
+  if(!comments.length) return '<p style="font-size:13px;color:var(--sub)">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>';
+  return comments.map((c,i)=>{
+    const isMine = savedUser && c.email === savedUser.email;
+    return `
+      <div class="post" data-comment-id="${c.id||''}">
+        <div class="avatar" style="background:${avatarColor(i+3)};overflow:hidden;">${avatarInner((membersData.find(m=>m.email===c.email)||{}).photoUrl, c.name)}</div>
+        <div class="post-body">
+          <div class="post-meta"><span style="font-weight:700;color:var(--ink)">${c.name}</span><span>${formatRelative(c.time)}${c.editedAt ? ' · 수정됨' : ''}</span></div>
+          <p class="post-snip comment-text-view" style="margin-top:4px">${escapeHtml(c.text)}</p>
+          ${isMine ? `<div class="comment-actions"><button type="button" class="comment-edit-btn">수정</button><button type="button" class="comment-delete-btn">삭제</button></div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+// container 안의 댓글 수정/삭제 버튼에 동작 연결. onRerender()는 수정/삭제 성공 후 화면을 다시 그리는 함수.
+function wireCommentActions(container, onRerender){
+  const savedUser = getSavedSession();
+  if(!savedUser || !container) return;
+  container.querySelectorAll('.comment-edit-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const post = btn.closest('.post');
+      const commentId = post.dataset.commentId;
+      const comment = commentsData.find(c=>c.id===commentId);
+      if(!comment) return;
+      const body = post.querySelector('.post-body');
+      const textEl = post.querySelector('.comment-text-view');
+      const actionsEl = post.querySelector('.comment-actions');
+      if(textEl) textEl.style.display = 'none';
+      if(actionsEl) actionsEl.style.display = 'none';
+      const editRow = document.createElement('div');
+      editRow.className = 'comment-edit-row';
+      editRow.innerHTML = `
+        <input type="text" class="comment-edit-input" value="${escapeHtml(comment.text)}">
+        <button type="button" class="comment-save-btn">저장</button>
+        <button type="button" class="comment-cancel-btn">취소</button>
+      `;
+      body.appendChild(editRow);
+      const input = editRow.querySelector('.comment-edit-input');
+      input.focus();
+      editRow.querySelector('.comment-cancel-btn').addEventListener('click', ()=>{
+        editRow.remove();
+        if(textEl) textEl.style.display = '';
+        if(actionsEl) actionsEl.style.display = '';
+      });
+      editRow.querySelector('.comment-save-btn').addEventListener('click', ()=>{
+        const text = input.value.trim();
+        if(!text) return;
+        const saveBtn = editRow.querySelector('.comment-save-btn');
+        saveBtn.disabled = true; saveBtn.textContent = '저장 중...';
+        apiPost('updateComment', { commentId, text, token: savedUser.token }).then(res=>{
+          if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+          const idx = commentsData.findIndex(c=>c.id===commentId);
+          if(idx>=0 && res.comment) commentsData[idx] = res.comment;
+          if(typeof onRerender === 'function') onRerender();
+        }).catch(err=>{
+          console.error('comment update failed', err);
+          alert(err && err.message ? err.message : '댓글 수정에 실패했어요. 잠시 후 다시 시도해주세요.');
+          saveBtn.disabled = false; saveBtn.textContent = '저장';
+        });
+      });
+    });
+  });
+  container.querySelectorAll('.comment-delete-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const post = btn.closest('.post');
+      const commentId = post.dataset.commentId;
+      if(!confirm('댓글을 삭제할까요?')) return;
+      apiPost('deleteComment', { commentId, token: savedUser.token }).then(res=>{
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        commentsData = commentsData.filter(c=>c.id!==commentId);
+        if(typeof onRerender === 'function') onRerender();
+      }).catch(err=>{
+        console.error('comment delete failed', err);
+        alert(err && err.message ? err.message : '댓글 삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    });
+  });
 }
 function getLogs(projectId){
   return logsData.filter(l => l.projectId === projectId)
@@ -1529,14 +1730,17 @@ function applyLoadedData(data){
   commentsData = data.comments || [];
   archiveData = data.archive || [];
   likesData = data.likes || [];
+  boardPostsData = data.boardPosts || [];
   if(Array.isArray(data.topics) && data.topics.length) topicsData = data.topics;
   if(Array.isArray(data.archiveTypes) && data.archiveTypes.length) archiveTypesData = data.archiveTypes;
+  if(Array.isArray(data.boardCategories) && data.boardCategories.length) boardCategoriesData = data.boardCategories;
 }
 function renderAllData(){
   renderRoster();
   renderDashboard();
   renderGallery(document.querySelector('#gallery .fpill.active')?.dataset.f || 'all');
   if(typeof renderArchive === 'function') renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+  if(typeof renderBoard === 'function') renderBoard();
   if(currentItemId) renderModal();
   if(typeof renderMyPage === 'function') renderMyPage(getSavedSession());
 }
@@ -1684,7 +1888,6 @@ function projectCardHtml(p, idx){
   const pct = p.progress || 0;
   return `
     <div class="g-card project-card" data-project-id="${p.id}">
-      <div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>
       <div class="g-body">
         <span class="g-tag">#${p.topic || ''}${hasAttachOrLink(p) ? ' · 📎 첨부' : ''}</span>
         <p class="g-title">${p.title}</p>
@@ -1722,10 +1925,8 @@ const archiveWrap = document.getElementById('archive-cards');
 
 function archiveCardHtml(item, idx){
   const author = membersData.find(m=>m.email===item.email);
-  const icon = item.type === '자료' ? '🔗' : '📁';
   return `
     <div class="g-card archive-card" data-archive-id="${item.id}">
-      <div class="g-thumb" style="background:${avatarColor(idx)}">${icon}</div>
       <div class="g-body">
         <span class="g-tag">#${item.type}${hasAttachOrLink(item) ? ' · 첨부' : ''}</span>
         <p class="g-title">${item.title}</p>
@@ -1791,21 +1992,13 @@ function openArchiveDetail(id){
       <p class="modal-desc">${item.desc ? escapeHtml(item.desc) : '설명이 없어요.'}</p>
       ${linksAttachmentsHtml(item, '바로가기', '첨부파일 보기')}
       <div>${likeButtonHtml('아카이브', item.id)}</div>
-      ${isMine ? `<div class="owner-actions"><button type="button" class="btn btn-ghost btn-sm" id="archive-delete-btn" style="color:var(--coral);">삭제</button></div>` : ''}
+      ${isMine ? `<div class="owner-actions"><button type="button" class="btn btn-ghost btn-sm" id="archive-edit-btn">수정</button><button type="button" class="btn btn-ghost btn-sm" id="archive-delete-btn" style="color:var(--coral);">삭제</button></div>` : ''}
     </div>
     <div class="modal-divider"></div>
     <div class="modal-comments">
       <h4>댓글 ${comments.length}</h4>
       <div class="comment-list" id="archive-comment-list">
-        ${comments.map((c,i)=>`
-          <div class="post">
-            <div class="avatar" style="background:${avatarColor(i+3)};overflow:hidden;">${avatarInner((membersData.find(m=>m.email===c.email)||{}).photoUrl, c.name)}</div>
-            <div class="post-body">
-              <div class="post-meta"><span style="font-weight:700;color:var(--ink)">${c.name}</span><span>${formatRelative(c.time)}</span></div>
-              <p class="post-snip" style="margin-top:4px">${escapeHtml(c.text)}</p>
-            </div>
-          </div>
-        `).join('') || '<p style="font-size:13px;color:var(--sub)">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>'}
+        ${commentListHtml(comments, savedUser)}
       </div>
       ${savedUser ? `
         <form class="comment-form" id="archive-comment-form">
@@ -1819,6 +2012,9 @@ function openArchiveDetail(id){
   wireLikeButton(archiveDetailContent, ()=>{
     openArchiveDetail(id);
     renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+  });
+  wireCommentActions(archiveDetailContent, ()=>{
+    openArchiveDetail(id);
   });
   const commentForm = document.getElementById('archive-comment-form');
   if(commentForm){
@@ -1845,6 +2041,13 @@ function openArchiveDetail(id){
       });
     });
   }
+  const archiveEditBtn = document.getElementById('archive-edit-btn');
+  if(archiveEditBtn){
+    archiveEditBtn.addEventListener('click', ()=>{
+      closeArchiveDetail();
+      openArchiveModal(item.id);
+    });
+  }
   const deleteBtn = document.getElementById('archive-delete-btn');
   if(deleteBtn){
     deleteBtn.addEventListener('click', ()=>{
@@ -1868,27 +2071,237 @@ function closeArchiveDetail(){
 document.getElementById('archive-detail-modal-close').addEventListener('click', closeArchiveDetail);
 archiveDetailModalBackdrop.addEventListener('click', (e)=>{ if(e.target===archiveDetailModalBackdrop) closeArchiveDetail(); });
 
+/* ---- 자유게시판 (참가자 자유 의견 · 댓글) ----
+   카드 크기/스타일은 아카이브·프로젝트 카드(.g-card/.g-body/.g-tag/.g-title/.g-meta)를 그대로 재사용 */
+const boardCardsWrap = document.getElementById('board-cards');
+let boardCategoriesData = ['건의', '잡담', '질문', '기타'];
+
+function boardCardHtml(p){
+  const author = membersData.find(m=>m.email===p.email);
+  return `
+    <div class="g-card board-card" data-board-id="${p.id}">
+      <div class="g-body">
+        <span class="g-tag">#${p.category || '기타'}</span>
+        <p class="g-title">${p.title}</p>
+        <div class="g-meta"><span>${author ? author.name : ''}</span><span>💬 ${getComments(p.id).length}</span></div>
+      </div>
+    </div>
+  `;
+}
+function renderBoard(filter){
+  if(!boardCardsWrap) return;
+  const f = filter || document.querySelector('#board-filters .fpill.active')?.dataset.f || 'all';
+  const sorted = boardPostsData.slice().sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+  const filtered = sorted.filter(p => f === 'all' || p.category === f);
+  if(!filtered.length){
+    boardCardsWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">아직 등록된 글이 없어요. 첫 글을 남겨보세요!</p>';
+    return;
+  }
+  boardCardsWrap.innerHTML = filtered.map(boardCardHtml).join('');
+  boardCardsWrap.querySelectorAll('.board-card').forEach(el=>{
+    el.addEventListener('click', ()=>openBoardDetail(el.dataset.boardId));
+  });
+}
+renderBoard('all');
+document.querySelectorAll('#board-filters .fpill').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#board-filters .fpill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderBoard(btn.dataset.f);
+  });
+});
+
+/* ---- 자유게시판 글쓰기/수정 모달 ---- */
+const boardModalBackdrop = document.getElementById('board-modal-backdrop');
+let editingBoardId = null;
+function openBoardModal(id){
+  const user = getSavedSession();
+  if(!user){ openAuthModal('login'); return; }
+  editingBoardId = id || null;
+  const editing = editingBoardId ? boardPostsData.find(p=>p.id===editingBoardId) : null;
+  document.getElementById('board-modal-title').textContent = editing ? '글 수정' : '자유게시판 글쓰기';
+  document.getElementById('board-submit-btn').textContent = editing ? '수정 완료' : '등록하기';
+  document.getElementById('board-category').value = editing ? (editing.category || boardCategoriesData[0]) : boardCategoriesData[0];
+  document.getElementById('board-title').value = editing ? editing.title : '';
+  document.getElementById('board-content').value = editing ? editing.content : '';
+  document.getElementById('board-msg').textContent = '';
+  if(boardModalBackdrop) boardModalBackdrop.classList.add('open');
+}
+function closeBoardModal(){
+  if(boardModalBackdrop) boardModalBackdrop.classList.remove('open');
+  editingBoardId = null;
+}
+document.getElementById('board-new-btn').addEventListener('click', (e)=>{ e.preventDefault(); openBoardModal(); });
+document.getElementById('board-modal-close').addEventListener('click', closeBoardModal);
+boardModalBackdrop.addEventListener('click', (e)=>{ if(e.target===boardModalBackdrop) closeBoardModal(); });
+
+document.getElementById('board-form').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const user = getSavedSession();
+  if(!user) return;
+  const category = document.getElementById('board-category').value;
+  const title = document.getElementById('board-title').value.trim();
+  const content = document.getElementById('board-content').value.trim();
+  const msg = document.getElementById('board-msg');
+  if(!title){ msg.style.color = 'var(--coral)'; msg.textContent = '제목을 입력해주세요.'; return; }
+  if(!content){ msg.style.color = 'var(--coral)'; msg.textContent = '내용을 입력해주세요.'; return; }
+
+  const btn = document.getElementById('board-submit-btn');
+  const savedEditingId = editingBoardId;
+  btn.disabled = true; btn.textContent = savedEditingId ? '수정하는 중...' : '등록하는 중...';
+  msg.style.color = 'var(--sub)'; msg.textContent = '';
+
+  const action = savedEditingId ? 'updateBoardPost' : 'addBoardPost';
+  const payload = savedEditingId
+    ? { id: savedEditingId, category, title, content, token: user.token }
+    : { category, title, content, token: user.token };
+
+  apiPost(action, payload).then(res=>{
+    if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+    if(savedEditingId){
+      const idx = boardPostsData.findIndex(p=>p.id===savedEditingId);
+      if(idx>=0 && res.post) boardPostsData[idx] = res.post;
+    } else if(res.post){
+      boardPostsData.unshift(res.post);
+    }
+    closeBoardModal();
+    renderBoard();
+    if(savedEditingId) openBoardDetail(savedEditingId);
+  }).catch(err=>{
+    console.error('board post save failed', err);
+    msg.style.color = 'var(--coral)';
+    msg.textContent = err && err.message ? err.message : '등록에 실패했어요.';
+  }).finally(()=>{
+    btn.disabled = false; btn.textContent = savedEditingId ? '수정 완료' : '등록하기';
+  });
+});
+
+/* ---- 자유게시판 상세보기 (본인 글은 삭제 가능 · 댓글) ---- */
+const boardDetailModalBackdrop = document.getElementById('board-detail-modal-backdrop');
+const boardDetailContent = document.getElementById('board-detail-content');
+
+function openBoardDetail(id){
+  const item = boardPostsData.find(p=>p.id===id);
+  if(!item || !boardDetailModalBackdrop || !boardDetailContent) return;
+  const author = membersData.find(m=>m.email===item.email);
+  const savedUser = getSavedSession();
+  const isMine = savedUser && item.email === savedUser.email;
+  const comments = getComments(item.id);
+  boardDetailContent.innerHTML = `
+    <div class="modal-body" style="padding:30px 28px 26px;">
+      <span class="modal-tag">#${item.category || '기타'}</span>
+      <h3 class="modal-title">${escapeHtml(item.title)}</h3>
+      <div class="modal-meta">
+        <div class="avatar" style="background:${avatarColor(0)};overflow:hidden;">${avatarInner(author ? author.photoUrl : '', author ? author.name : '')}</div>
+        <div style="flex:1;">
+          <div class="m-author">${author ? author.name : ''}${isMine ? ' (나)' : ''}</div>
+          <div class="m-dept">${author ? author.dept : ''}</div>
+        </div>
+        <span style="font-size:12px;color:var(--sub);">${formatRelative(item.createdAt)}${item.editedAt ? ' · 수정됨' : ''}</span>
+      </div>
+      <p class="modal-desc" style="white-space:pre-wrap;">${escapeHtml(item.content)}</p>
+      ${isMine ? `<div class="owner-actions"><button type="button" class="btn btn-ghost btn-sm" id="board-edit-btn">수정</button><button type="button" class="btn btn-ghost btn-sm" id="board-delete-btn" style="color:var(--coral);">삭제</button></div>` : ''}
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-comments">
+      <h4>댓글 ${comments.length}</h4>
+      <div class="comment-list" id="board-comment-list">
+        ${commentListHtml(comments, savedUser)}
+      </div>
+      ${savedUser ? `
+        <form class="comment-form" id="board-comment-form">
+          <div class="avatar" style="width:32px;height:32px;font-size:11px;background:${avatarColor(comments.length+5)};overflow:hidden;">${avatarInner(savedUser.photoUrl, savedUser.name)}</div>
+          <input type="text" id="board-comment-input" placeholder="댓글을 남겨보세요" required>
+          <button type="submit" class="btn btn-primary btn-sm">등록</button>
+        </form>
+      ` : `<p class="comment-gate">댓글을 남기려면 로그인이 필요해요.</p>`}
+    </div>
+  `;
+  wireCommentActions(boardDetailContent, ()=>{ openBoardDetail(id); });
+  const commentForm = document.getElementById('board-comment-form');
+  if(commentForm){
+    commentForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const input = document.getElementById('board-comment-input');
+      const text = input.value.trim();
+      if(!text) return;
+      const submitBtn = commentForm.querySelector('button[type=submit]');
+      input.disabled = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '등록 중...';
+      apiPost('addComment', { itemId: item.id, name: savedUser.name, text, token: savedUser.token }).then(res=>{
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        if(res.comment) commentsData.push(res.comment);
+        openBoardDetail(id);
+        renderBoard();
+      }).catch(err=>{
+        console.error('board comment save failed', err);
+        input.disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = '등록';
+        alert('댓글 등록에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    });
+  }
+  const boardEditBtn = document.getElementById('board-edit-btn');
+  if(boardEditBtn){
+    boardEditBtn.addEventListener('click', ()=>{
+      closeBoardDetail();
+      openBoardModal(item.id);
+    });
+  }
+  const boardDeleteBtn = document.getElementById('board-delete-btn');
+  if(boardDeleteBtn){
+    boardDeleteBtn.addEventListener('click', ()=>{
+      if(!confirm(`"${item.title}" 글을 삭제할까요? 댓글도 함께 삭제돼요.`)) return;
+      apiPost('deleteBoardPost', { id: item.id, token: savedUser.token }).then(res=>{
+        if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+        const deletedId = res.deletedPostId || item.id;
+        boardPostsData = boardPostsData.filter(p => p.id !== deletedId);
+        commentsData = commentsData.filter(c => c.itemId != deletedId);
+        closeBoardDetail();
+        renderBoard();
+      }).catch(err=>{
+        console.error('board delete failed', err);
+        alert('삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+      });
+    });
+  }
+  boardDetailModalBackdrop.classList.add('open');
+}
+function closeBoardDetail(){
+  if(boardDetailModalBackdrop) boardDetailModalBackdrop.classList.remove('open');
+}
+document.getElementById('board-detail-modal-close').addEventListener('click', closeBoardDetail);
+boardDetailModalBackdrop.addEventListener('click', (e)=>{ if(e.target===boardDetailModalBackdrop) closeBoardDetail(); });
+
 /* ---- 아카이브 올리기 모달 ---- */
 const archiveModalBackdrop = document.getElementById('archive-modal-backdrop');
 const archiveLinkManager = makeLinkListManager('archive-link-list', 'archive-add-link-btn', 5);
 const archiveAttachManager = makeAttachmentManager({
   dropzoneId: 'archive-dropzone', inputId: 'archive-file', listId: 'archive-attach-list',
-  msgId: 'archive-file-msg', maxCount: 5, maxSizeMB: 20
+  msgId: 'archive-file-msg', maxCount: 3, maxSizeMB: 8
 });
 
-function openArchiveModal(){
+let editingArchiveId = null;
+function openArchiveModal(id){
   const user = getSavedSession();
   if(!user){ openAuthModal('login'); return; }
-  document.getElementById('archive-type').value = archiveTypesData[0] || '프로젝트';
-  document.getElementById('archive-title').value = '';
-  document.getElementById('archive-desc').value = '';
-  archiveLinkManager.reset([]);
-  archiveAttachManager.reset([]);
+  editingArchiveId = id || null;
+  const editing = editingArchiveId ? archiveData.find(a=>a.id===editingArchiveId) : null;
+  document.getElementById('archive-modal-title').textContent = editing ? '아카이브 항목 수정' : '아카이브에 올리기';
+  document.getElementById('archive-submit-btn').textContent = editing ? '수정 완료' : '올리기';
+  document.getElementById('archive-type').value = editing ? editing.type : (archiveTypesData[0] || '프로젝트');
+  document.getElementById('archive-title').value = editing ? editing.title : '';
+  document.getElementById('archive-desc').value = editing ? (editing.desc||'') : '';
+  archiveLinkManager.reset(editing ? (editing.links||[]) : []);
+  archiveAttachManager.reset(editing ? (editing.attachments||[]) : []);
   document.getElementById('archive-msg').textContent = '';
   if(archiveModalBackdrop) archiveModalBackdrop.classList.add('open');
 }
 function closeArchiveModal(){
   if(archiveModalBackdrop) archiveModalBackdrop.classList.remove('open');
+  editingArchiveId = null;
 }
 document.getElementById('archive-new-btn').addEventListener('click', (e)=>{ e.preventDefault(); openArchiveModal(); });
 document.getElementById('archive-modal-close').addEventListener('click', closeArchiveModal);
@@ -1903,27 +2316,35 @@ document.getElementById('archive-form').addEventListener('submit', (e)=>{
   const desc = document.getElementById('archive-desc').value.trim();
   const links = archiveLinkManager.getValues();
   const files = archiveAttachManager.getNewFiles();
+  const keepAttachments = archiveAttachManager.getKeptAttachments();
   const msg = document.getElementById('archive-msg');
   if(!title){ msg.style.color = 'var(--coral)'; msg.textContent = '제목을 입력해주세요.'; return; }
-  if(!links.length && !files.length){ msg.style.color = 'var(--coral)'; msg.textContent = '링크 또는 파일 중 하나는 꼭 넣어주세요.'; return; }
+  if(!links.length && !files.length && !keepAttachments.length){ msg.style.color = 'var(--coral)'; msg.textContent = '링크 또는 파일 중 하나는 꼭 넣어주세요.'; return; }
 
   const btn = document.getElementById('archive-submit-btn');
   btn.disabled = true;
-  btn.textContent = files.length ? '업로드 중...' : '올리는 중...';
+  btn.textContent = files.length ? '업로드 중...' : (editingArchiveId ? '수정하는 중...' : '올리는 중...');
   msg.style.color = 'var(--sub)';
   msg.textContent = files.length ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
 
-  apiPost('addArchiveItem', { type, title, desc, links, files, token: user.token }).then(res=>{
+  const action = editingArchiveId ? 'updateArchiveItem' : 'addArchiveItem';
+  const payload = editingArchiveId
+    ? { id: editingArchiveId, type, title, desc, links, files, keepAttachments, token: user.token }
+    : { type, title, desc, links, files, token: user.token };
+  const savedEditingId = editingArchiveId;
+
+  apiPost(action, payload).then(res=>{
     if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
     upsertArchiveItem(res.item);
     closeArchiveModal();
     renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+    if(savedEditingId) openArchiveDetail(savedEditingId);
   }).catch(err=>{
     console.error('archive save failed', err);
     msg.style.color = 'var(--coral)';
     msg.textContent = err && err.message ? err.message : '저장에 실패했어요.';
   }).finally(()=>{
-    btn.disabled = false; btn.textContent = '올리기';
+    btn.disabled = false; btn.textContent = editingArchiveId ? '수정 완료' : '올리기';
   });
 });
 
@@ -2022,15 +2443,7 @@ function renderModal(){
     <div class="modal-comments">
       <h4>댓글 ${comments.length}</h4>
       <div class="comment-list" id="modal-comment-list">
-        ${comments.map((c,i)=>`
-          <div class="post">
-            <div class="avatar" style="background:${avatarColor(i+3)};overflow:hidden;">${avatarInner((membersData.find(m=>m.email===c.email)||{}).photoUrl, c.name)}</div>
-            <div class="post-body">
-              <div class="post-meta"><span style="font-weight:700;color:var(--ink)">${c.name}</span><span>${formatRelative(c.time)}</span></div>
-              <p class="post-snip" style="margin-top:4px">${escapeHtml(c.text)}</p>
-            </div>
-          </div>
-        `).join('') || '<p style="font-size:13px;color:var(--sub)">아직 댓글이 없어요. 첫 댓글을 남겨보세요.</p>'}
+        ${commentListHtml(comments, savedUser)}
       </div>
       ${savedUser ? `
         <form class="comment-form" id="comment-form">
@@ -2149,6 +2562,9 @@ function renderModal(){
     renderModal();
     renderGallery(document.querySelector('.fpill.active')?.dataset.f || 'all');
   });
+  wireCommentActions(modalContent, ()=>{
+    renderModal();
+  });
 }
 
 /* ---- 마이페이지 (내 프로젝트 여러 개 등록 · 진행현황) ---- */
@@ -2159,7 +2575,6 @@ function myProjectCardHtml(p, idx){
   const pct = p.progress || 0;
   return `
     <div class="g-card project-card" data-project-id="${p.id}">
-      <div class="g-thumb" style="background:${avatarColor(idx)}">✦</div>
       <div class="g-body">
         <span class="g-tag">#${p.topic || ''}${hasAttachOrLink(p) ? ' · 📎 첨부' : ''}</span>
         <p class="g-title">${p.title}</p>
@@ -2243,7 +2658,7 @@ let editingProjectId = null;
 const projectLinkManager = makeLinkListManager('project-link-list', 'project-add-link-btn', 5);
 const projectAttachManager = makeAttachmentManager({
   dropzoneId: 'project-dropzone', inputId: 'project-file', listId: 'project-attach-list',
-  msgId: 'project-file-msg', maxCount: 5, maxSizeMB: 20
+  msgId: 'project-file-msg', maxCount: 3, maxSizeMB: 8
 });
 
 function populateTopicSelect(){
@@ -2516,18 +2931,41 @@ authLoginForm.addEventListener('submit', (e)=>{
   }).finally(()=>{ btn.disabled = false; btn.textContent = '로그인'; });
 });
 
+const forgotPasswordLink = document.getElementById('forgot-password-link');
+if(forgotPasswordLink){
+  forgotPasswordLink.addEventListener('click', (e)=>{
+    e.preventDefault();
+    const emailInput = document.getElementById('login-email');
+    let email = emailInput.value.trim();
+    if(!email){
+      email = (prompt('비밀번호를 재설정할 회사 이메일을 입력해주세요. (예: hong@donga.com)') || '').trim();
+    }
+    if(!email){ return; }
+    authMsg.style.color = 'var(--sub)'; authMsg.textContent = '재설정 이메일을 보내는 중...';
+    apiPost('sendPasswordReset', { email }).then(res=>{
+      if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
+      authMsg.style.color = '#0F9D74';
+      authMsg.textContent = `${email} 주소로 비밀번호 재설정 이메일을 보냈어요. 메일함(스팸함도)을 확인해주세요.`;
+    }).catch(err=>{
+      authMsg.style.color = 'var(--coral)';
+      authMsg.textContent = err && err.message ? err.message : '재설정 이메일 발송에 실패했어요.';
+    });
+  });
+}
+
 let signupPhotoData = null; // {base64, name, mime}
 const signupPhotoInput = document.getElementById('signup-photo');
 const signupPhotoPreview = document.getElementById('signup-photo-preview');
 if(signupPhotoInput){
-  signupPhotoInput.addEventListener('change', ()=>{
-    const file = signupPhotoInput.files[0];
+  signupPhotoInput.addEventListener('change', async ()=>{
+    const rawFile = signupPhotoInput.files[0];
     signupPhotoData = null;
-    if(!file) return;
-    if(file.type.indexOf('image/') !== 0){
+    if(!rawFile) return;
+    if(rawFile.type.indexOf('image/') !== 0){
       authMsg.style.color = 'var(--coral)'; authMsg.textContent = '프로필 사진은 이미지 파일만 가능해요.';
       signupPhotoInput.value = ''; return;
     }
+    const file = await compressImageFile(rawFile, 800, 0.85);
     if(file.size > 8*1024*1024){
       authMsg.style.color = 'var(--coral)'; authMsg.textContent = '사진 파일이 너무 커요. 8MB 이하로 올려주세요.';
       signupPhotoInput.value = ''; return;
@@ -2620,16 +3058,18 @@ profileModalBackdrop.addEventListener('click', (e)=>{ if(e.target===profileModal
 
 const profilePhotoInput = document.getElementById('profile-photo');
 if(profilePhotoInput){
-  profilePhotoInput.addEventListener('change', ()=>{
-    const file = profilePhotoInput.files[0];
+  profilePhotoInput.addEventListener('change', async ()=>{
+    const rawFile = profilePhotoInput.files[0];
     const preview = document.getElementById('profile-photo-preview');
     const msg = document.getElementById('profile-msg');
     profilePhotoData = null;
-    if(!file) return;
-    if(file.type.indexOf('image/') !== 0){
+    if(!rawFile) return;
+    if(rawFile.type.indexOf('image/') !== 0){
       msg.style.color = 'var(--coral)'; msg.textContent = '이미지 파일만 등록할 수 있어요.';
       profilePhotoInput.value = ''; return;
     }
+    msg.style.color = 'var(--sub)'; msg.textContent = '사진을 압축하고 있어요...';
+    const file = await compressImageFile(rawFile, 800, 0.85);
     if(file.size > PROFILE_MAX_FILE_MB*1024*1024){
       msg.style.color = 'var(--coral)'; msg.textContent = `파일이 너무 커요. ${PROFILE_MAX_FILE_MB}MB 이하로 올려주세요.`;
       profilePhotoInput.value = ''; return;
@@ -2710,9 +3150,568 @@ document.getElementById('profile-form').addEventListener('submit', (e)=>{
   });
 })();
 
-/* ---- 초기 로드 ---- */
-loadAllData();
-initAuth();
+/* ---- 초기 로드 ----
+   주의: loadAllData()/initAuth()를 여기서 바로 호출하지 않는다.
+   이 시점에는 아직 아래 <script type="module"> (Firebase 어댑터)가 실행되기 전이라
+   window.apiGet/apiPost가 "Firebase 초기화 중" 이라는 안전장치 함수 상태이기 때문.
+   (모듈 스크립트는 defer 되어 이 클래식 스크립트가 다 끝난 뒤에 실행됨)
+   실제 호출은 이 파일 맨 아래 모듈 스크립트에서 window.loadAllData()로 한다. */
+</script>
+
+<script type="module">
+/* =====================================================================
+   Firebase 어댑터 (프로토타입) — Google Sheets/Apps Script를 대체하는
+   Firestore + Firebase Authentication 연결 레이어.
+
+   역할: 위쪽의 거대한 기존 스크립트는 그대로 두고, 그 스크립트가 부르는
+   apiGet(type) / apiPost(action, payload) 두 함수만 이 모듈이 Firebase로
+   구현해서 window.apiGet / window.apiPost 로 덮어쓴다.
+   (파일 업로드만 별도로, 유료 플랜이 필요 없는 "업로드 전용 경량 Apps Script"를
+   그대로 호출해서 구글 드라이브에 저장한다.)
+   ===================================================================== */
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signOut, updatePassword, onAuthStateChanged, sendPasswordResetEmail
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc,
+  collection, getDocs, query, where, writeBatch
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCqGRE67oq6b2yGKcZm87gLV0QcSJ3PAG4",
+  authDomain: "peoplexity-77327.firebaseapp.com",
+  projectId: "peoplexity-77327",
+  storageBucket: "peoplexity-77327.firebasestorage.app",
+  messagingSenderId: "580165115368",
+  appId: "1:580165115368:web:6dace8b1d2eeecd17bd85d",
+  measurementId: "G-VJLG2EYLQT"
+};
+
+// ⚠️ 파일 업로드 전용 경량 Apps Script 배포 URL (구글 드라이브에 파일을 올려주는 서비스)
+const UPLOAD_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDIdJSo7TvxSjgGclu05EDLEEzbigp5J8yQGycFmrO4m7JK6U8bgqv5fb9csmAXbu-1Q/exec';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// 기존 백엔드(.gs)에서 쓰던 고정값들을 그대로 유지 (프론트엔드 동작을 완전히 동일하게 맞추기 위함)
+const TOPICS = ['업무 효율화를 위한 AI 학습', '바이브코딩 내재화 및 실무 적용', 'AI활용 사례 공모전 출품', '기타'];
+const ARCHIVE_TYPES = ['프로젝트', '자료'];
+const BOARD_CATEGORIES = ['건의', '잡담', '질문', '기타'];
+const MAX_LINKS = 5;
+const MAX_ATTACHMENTS = 3;
+
+function nowIso(){ return new Date().toISOString(); }
+
+/* ---- Firebase Auth 오류를 기존 화면에서 쓰던 것과 비슷한 한국어 메시지로 변환 ---- */
+function mapAuthError_(err){
+  const code = err && err.code || '';
+  if(code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential'){
+    return '이메일 또는 비밀번호가 올바르지 않아요.';
+  }
+  if(code === 'auth/email-already-in-use') return '이미 가입(참가신청)된 이메일이에요. 로그인해주세요.';
+  if(code === 'auth/weak-password') return '비밀번호는 8자 이상으로 설정해주세요.';
+  if(code === 'auth/too-many-requests') return '너무 여러 번 시도했어요. 잠시 후 다시 시도해주세요.';
+  if(code === 'auth/requires-recent-login') return '보안을 위해 로그아웃 후 다시 로그인한 뒤 시도해주세요.';
+  if(code === 'auth/network-request-failed') return '네트워크 오류가 발생했어요. 잠시 후 다시 시도해주세요.';
+  return (err && err.message) || '알 수 없는 오류가 발생했어요.';
+}
+
+/* ---- 파일 업로드: 업로드 전용 경량 Apps Script 호출 ----
+   files: [{fileData(base64), fileName, fileMime}, ...], kind: 'profile' | 'attachment' */
+async function uploadViaAppsScript_(idToken, files, kind){
+  if(!files || !files.length) return [];
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 30000);
+  let res;
+  try{
+    res = await fetch(UPLOAD_APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      signal: controller.signal,
+      body: JSON.stringify({ idToken, files, kind })
+    });
+  }catch(e){
+    throw new Error('파일 업로드 서버에 연결하지 못했어요. 잠시 후 다시 시도해주세요.');
+  }finally{
+    clearTimeout(timer);
+  }
+  const data = await res.json();
+  if(data.ok === false) throw new Error(data.error || '파일 업로드에 실패했어요.');
+  return data.files || [];
+}
+
+/* ---- Firestore members 문서 + Firebase Auth 계정을 합쳐서, 기존 화면이 기대하는
+   {email,name,dept,phone,photoUrl} 모양으로 만들어주는 헬퍼 ---- */
+async function userToLegacyShape_(fbUser){
+  const snap = await getDoc(doc(db, 'members', fbUser.uid));
+  const m = snap.exists() ? snap.data() : {};
+  return {
+    email: fbUser.email,
+    name: m.name || '',
+    dept: m.dept || '',
+    phone: m.phone || '',
+    photoUrl: m.photoUrl || ''
+  };
+}
+function requireUser_(){
+  if(!auth.currentUser) throw new Error('로그인이 필요해요.');
+  return auth.currentUser;
+}
+
+/* ---- 응답을 기존 화면이 기대하는 필드 이름으로 맞춰주는 매퍼들
+   (Firestore에는 authorUid/authorEmail로 저장하지만, 화면 쪽 코드는 예전부터 email 필드를 씀) ---- */
+function toLegacyProject(id, d){
+  return {
+    id, email: d.authorEmail, title: d.title, topic: d.topic, goal: d.goal,
+    steps: d.steps || [], progress: d.progress || 0,
+    createdAt: d.createdAt, updatedAt: d.updatedAt,
+    links: d.links || [], attachments: d.attachments || []
+  };
+}
+function toLegacyArchive(id, d){
+  return {
+    id, email: d.authorEmail, type: d.type, title: d.title, desc: d.desc,
+    links: d.links || [], attachments: d.attachments || [],
+    createdAt: d.createdAt, views: d.views || 0
+  };
+}
+function toLegacyLog(id, d){
+  return { id, projectId: d.projectId, email: d.authorEmail, content: d.content, progress: d.progress, loggedAt: d.loggedAt };
+}
+function toLegacyComment(id, d){
+  return { id, itemId: d.itemId, email: d.authorEmail, name: d.name, text: d.text, time: d.time, editedAt: d.editedAt || null };
+}
+function toLegacyLike(id, d){
+  return { id, targetType: d.targetType, targetId: d.targetId, email: d.authorEmail, likedAt: d.likedAt };
+}
+function toLegacyMember(d){
+  return { email: d.email, name: d.name, dept: d.dept, joinedAt: d.joinedAt, photoUrl: d.photoUrl || '' };
+}
+function toLegacyBoardPost(id, d){
+  return { id, email: d.authorEmail, title: d.title, content: d.content, category: d.category || BOARD_CATEGORIES[0], createdAt: d.createdAt, editedAt: d.editedAt || null };
+}
+
+/* ---- 특정 필드 값으로 컬렉션 전체에서 찾아 일괄 삭제 (진행기록/댓글/좋아요 cascade delete용) ---- */
+async function deleteWhereField_(collName, field, value){
+  const snaps = await getDocs(query(collection(db, collName), where(field, '==', value)));
+  if(snaps.empty) return;
+  const batch = writeBatch(db);
+  snaps.forEach(d => batch.delete(d.ref));
+  await batch.commit();
+}
+async function deleteLikesFor_(targetType, targetId){
+  const snaps = await getDocs(query(collection(db, 'likes'), where('targetType', '==', targetType), where('targetId', '==', targetId)));
+  if(snaps.empty) return;
+  const batch = writeBatch(db);
+  snaps.forEach(d => batch.delete(d.ref));
+  await batch.commit();
+}
+
+/* ==================== apiGet: 전체 데이터 조회 ==================== */
+async function fbApiGet(type){
+  const [membersSnap, projectsSnap, logsSnap, commentsSnap, archiveSnap, likesSnap, boardSnap] = await Promise.all([
+    getDocs(collection(db, 'members')),
+    getDocs(collection(db, 'projects')),
+    getDocs(collection(db, 'progressLogs')),
+    getDocs(collection(db, 'comments')),
+    getDocs(collection(db, 'archiveItems')),
+    getDocs(collection(db, 'likes')),
+    getDocs(collection(db, 'boardPosts')),
+  ]);
+  const members = membersSnap.docs.map(d => toLegacyMember(d.data()));
+  const projects = projectsSnap.docs.map(d => toLegacyProject(d.id, d.data()));
+  const logs = logsSnap.docs.map(d => toLegacyLog(d.id, d.data()));
+  const comments = commentsSnap.docs.map(d => toLegacyComment(d.id, d.data()));
+  const archive = archiveSnap.docs.map(d => toLegacyArchive(d.id, d.data()))
+    .sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+  const likes = likesSnap.docs.map(d => toLegacyLike(d.id, d.data()));
+  const boardPosts = boardSnap.docs.map(d => toLegacyBoardPost(d.id, d.data()))
+    .sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+  return { members, projects, logs, comments, archive, likes, boardPosts, topics: TOPICS, archiveTypes: ARCHIVE_TYPES, boardCategories: BOARD_CATEGORIES };
+}
+
+/* ==================== apiPost: 액션별 처리 ==================== */
+async function fbApiPost(action, payload){
+  payload = payload || {};
+  try{
+    switch(action){
+
+      case 'login': {
+        let cred;
+        try{ cred = await signInWithEmailAndPassword(auth, payload.email, payload.password); }
+        catch(err){ throw new Error(mapAuthError_(err)); }
+        const user = await userToLegacyShape_(cred.user);
+        return { ok:true, token: cred.user.uid, user };
+      }
+
+      case 'signup': {
+        const email = String(payload.email||'').trim();
+        if(!email.toLowerCase().endsWith('@donga.com')){
+          throw new Error('회사 이메일(@donga.com)로만 가입할 수 있어요.');
+        }
+        let cred;
+        try{ cred = await createUserWithEmailAndPassword(auth, email, payload.password); }
+        catch(err){ throw new Error(mapAuthError_(err)); }
+        let photoUrl = '';
+        if(payload.fileData){
+          const idToken = await cred.user.getIdToken();
+          const uploaded = await uploadViaAppsScript_(idToken, [{ fileData: payload.fileData, fileName: payload.fileName, fileMime: payload.fileMime }], 'profile');
+          photoUrl = (uploaded[0] && uploaded[0].url) || '';
+        }
+        const memberData = {
+          email, name: payload.name || '', dept: payload.dept || '',
+          phone: payload.phone || '', joinedAt: nowIso(), photoUrl
+        };
+        await setDoc(doc(db, 'members', cred.user.uid), memberData, { merge: true });
+        return { ok:true, token: cred.user.uid, user: toLegacyMember(memberData) };
+      }
+
+      case 'sendPasswordReset': {
+        const email = String(payload.email||'').trim();
+        if(!email) throw new Error('이메일을 입력해주세요.');
+        try{
+          await sendPasswordResetEmail(auth, email);
+        }catch(err){
+          // 존재하지 않는 이메일이어도 굳이 구분해서 알려주지 않음(계정 존재 여부 노출 방지) — 그냥 일반 오류로 처리
+          throw new Error(mapAuthError_(err));
+        }
+        return { ok:true };
+      }
+
+      case 'logout': {
+        await signOut(auth);
+        return { ok:true };
+      }
+
+      case 'whoami': {
+        if(!auth.currentUser) return { ok:false, error:'로그인 정보가 없어요.' };
+        const user = await userToLegacyShape_(auth.currentUser);
+        return { ok:true, user };
+      }
+
+      case 'updateProfile': {
+        const u = requireUser_();
+        const updates = {};
+        if(payload.dept !== undefined) updates.dept = payload.dept;
+        if(payload.phone !== undefined) updates.phone = payload.phone;
+        if(payload.fileData){
+          const idToken = await u.getIdToken();
+          const uploaded = await uploadViaAppsScript_(idToken, [{ fileData: payload.fileData, fileName: payload.fileName, fileMime: payload.fileMime }], 'profile');
+          updates.photoUrl = (uploaded[0] && uploaded[0].url) || '';
+        }
+        if(payload.newPassword){
+          try{ await updatePassword(u, payload.newPassword); }
+          catch(err){ throw new Error(mapAuthError_(err)); }
+        }
+        if(Object.keys(updates).length){
+          await setDoc(doc(db, 'members', u.uid), updates, { merge: true });
+        }
+        const user = await userToLegacyShape_(u);
+        return { ok:true, user };
+      }
+
+      case 'createProject': {
+        const u = requireUser_();
+        const title = String(payload.title||'').trim();
+        if(!title) throw new Error('프로젝트명을 입력해주세요.');
+        const topic = TOPICS.indexOf(payload.topic) >= 0 ? payload.topic : TOPICS[0];
+        const goal = String(payload.goal||'').trim();
+        let steps = Array.isArray(payload.steps) ? payload.steps.map(s=>({text:String(s.text||'').trim(), done:!!s.done})).filter(s=>s.text) : [];
+        const links = (Array.isArray(payload.links) ? payload.links : []).map(l=>String(l||'').trim()).filter(l=>l).slice(0, MAX_LINKS);
+        let attachments = [];
+        if(payload.files && payload.files.length){
+          const idToken = await u.getIdToken();
+          attachments = await uploadViaAppsScript_(idToken, payload.files, 'attachment');
+        }
+        const progress = payload.completed ? 100 : 0;
+        if(payload.completed) steps = steps.map(s=>Object.assign({}, s, {done:true}));
+        const now = nowIso();
+        const data = { authorUid:u.uid, authorEmail:u.email, title, topic, goal, steps, progress, createdAt:now, updatedAt:now, links, attachments };
+        const ref = await addDoc(collection(db,'projects'), data);
+        return { ok:true, project: toLegacyProject(ref.id, data) };
+      }
+
+      case 'updateProjectInfo': {
+        const u = requireUser_();
+        const ref = doc(db, 'projects', payload.projectId);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) throw new Error('프로젝트를 찾을 수 없어요.');
+        const pdata = snap.data();
+        if(pdata.authorUid !== u.uid) throw new Error('본인이 등록한 프로젝트만 수정할 수 있어요.');
+
+        const title = String(payload.title||'').trim() || pdata.title;
+        const topic = TOPICS.indexOf(payload.topic) >= 0 ? payload.topic : pdata.topic;
+        const goal = payload.goal !== undefined ? String(payload.goal).trim() : pdata.goal;
+        const links = Array.isArray(payload.links) ? payload.links.map(l=>String(l||'').trim()).filter(l=>l).slice(0, MAX_LINKS) : (pdata.links||[]);
+        let steps = Array.isArray(payload.steps) ? payload.steps.map(s=>({text:String(s.text||'').trim(), done:!!s.done})).filter(s=>s.text) : (pdata.steps||[]);
+        let progress = pdata.progress || 0;
+        if(payload.completed){ progress = 100; steps = steps.map(s=>Object.assign({}, s, {done:true})); }
+
+        let uploaded = [];
+        if(payload.files && payload.files.length){
+          const idToken = await u.getIdToken();
+          uploaded = await uploadViaAppsScript_(idToken, payload.files, 'attachment');
+        }
+        const kept = Array.isArray(payload.keepAttachments) ? payload.keepAttachments : (pdata.attachments||[]);
+        const attachments = kept.concat(uploaded).slice(0, MAX_ATTACHMENTS);
+
+        const now = nowIso();
+        const updates = { title, topic, goal, links, steps, progress, attachments, updatedAt: now };
+        await updateDoc(ref, updates);
+        return { ok:true, project: toLegacyProject(payload.projectId, Object.assign({}, pdata, updates)) };
+      }
+
+      case 'updateProjectSteps': {
+        const u = requireUser_();
+        const ref = doc(db, 'projects', payload.projectId);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) throw new Error('프로젝트를 찾을 수 없어요.');
+        const pdata = snap.data();
+        if(pdata.authorUid !== u.uid) throw new Error('본인이 등록한 프로젝트만 수정할 수 있어요.');
+        const steps = (Array.isArray(payload.steps) ? payload.steps : []).map(s=>({text:String(s.text||'').trim(), done:!!s.done})).filter(s=>s.text);
+        const now = nowIso();
+        await updateDoc(ref, { steps, updatedAt: now });
+        return { ok:true, project: toLegacyProject(payload.projectId, Object.assign({}, pdata, { steps, updatedAt: now })) };
+      }
+
+      case 'deleteProject': {
+        const u = requireUser_();
+        const ref = doc(db, 'projects', payload.projectId);
+        const snap = await getDoc(ref);
+        if(snap.exists()){
+          if(snap.data().authorUid !== u.uid) throw new Error('본인이 등록한 프로젝트만 삭제할 수 있어요.');
+          // 부모 문서가 아직 살아있는 동안(=보안 규칙이 소유자를 확인할 수 있는 동안) 딸린 항목부터 먼저 삭제
+          await deleteWhereField_('progressLogs', 'projectId', payload.projectId);
+          await deleteWhereField_('comments', 'itemId', payload.projectId);
+          await deleteLikesFor_('프로젝트', payload.projectId);
+          await deleteDoc(ref);
+        }
+        return { ok:true, deletedProjectId: payload.projectId };
+      }
+
+      case 'addProgressLog': {
+        const u = requireUser_();
+        const ref = doc(db, 'projects', payload.projectId);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) throw new Error('프로젝트를 찾을 수 없어요.');
+        const pdata = snap.data();
+        if(pdata.authorUid !== u.uid) throw new Error('본인이 등록한 프로젝트에만 진행 기록을 남길 수 있어요.');
+        const content = String(payload.content||'').trim();
+        if(!content) throw new Error('진행 내용을 입력해주세요.');
+        let progress = Number(payload.progress); if(isNaN(progress)) progress = 0;
+        progress = Math.max(0, Math.min(100, Math.round(progress)));
+        const now = nowIso();
+        const logData = { projectId: payload.projectId, authorUid:u.uid, authorEmail:u.email, content, progress, loggedAt: now };
+        const logRef = await addDoc(collection(db,'progressLogs'), logData);
+        await updateDoc(ref, { progress, updatedAt: now });
+        return {
+          ok:true,
+          log: toLegacyLog(logRef.id, logData),
+          project: toLegacyProject(payload.projectId, Object.assign({}, pdata, { progress, updatedAt: now }))
+        };
+      }
+
+      case 'addComment': {
+        const u = requireUser_();
+        const text = String(payload.text||'').trim();
+        if(!text) throw new Error('댓글 내용을 입력해주세요.');
+        const commentData = { itemId: payload.itemId, authorUid:u.uid, authorEmail:u.email, name: payload.name || u.email, text, time: nowIso() };
+        const ref = await addDoc(collection(db,'comments'), commentData);
+        return { ok:true, comment: toLegacyComment(ref.id, commentData) };
+      }
+
+      case 'updateComment': {
+        const u = requireUser_();
+        const ref = doc(db, 'comments', payload.commentId);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) throw new Error('댓글을 찾을 수 없어요.');
+        const cdata = snap.data();
+        if(cdata.authorUid !== u.uid) throw new Error('본인이 작성한 댓글만 수정할 수 있어요.');
+        const text = String(payload.text||'').trim();
+        if(!text) throw new Error('댓글 내용을 입력해주세요.');
+        const now = nowIso();
+        await updateDoc(ref, { text, editedAt: now });
+        return { ok:true, comment: toLegacyComment(payload.commentId, Object.assign({}, cdata, { text, editedAt: now })) };
+      }
+
+      case 'deleteComment': {
+        const u = requireUser_();
+        const ref = doc(db, 'comments', payload.commentId);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) return { ok:true, deletedCommentId: payload.commentId };
+        if(snap.data().authorUid !== u.uid) throw new Error('본인이 작성한 댓글만 삭제할 수 있어요.');
+        await deleteDoc(ref);
+        return { ok:true, deletedCommentId: payload.commentId };
+      }
+
+      case 'addArchiveItem': {
+        const u = requireUser_();
+        const title = String(payload.title||'').trim();
+        if(!title) throw new Error('제목을 입력해주세요.');
+        const type = ARCHIVE_TYPES.indexOf(payload.type) >= 0 ? payload.type : ARCHIVE_TYPES[0];
+        const desc = String(payload.desc||'').trim();
+        const links = (Array.isArray(payload.links) ? payload.links : []).map(l=>String(l||'').trim()).filter(l=>l).slice(0, MAX_LINKS);
+        let attachments = [];
+        if(payload.files && payload.files.length){
+          const idToken = await u.getIdToken();
+          attachments = await uploadViaAppsScript_(idToken, payload.files, 'attachment');
+        }
+        if(!links.length && !attachments.length) throw new Error('링크 또는 파일 중 하나는 꼭 넣어주세요.');
+        const now = nowIso();
+        const data = { authorUid:u.uid, authorEmail:u.email, type, title, desc, links, attachments, createdAt: now, views: 0 };
+        const ref = await addDoc(collection(db,'archiveItems'), data);
+        return { ok:true, item: toLegacyArchive(ref.id, data) };
+      }
+
+      case 'updateArchiveItem': {
+        const u = requireUser_();
+        const ref = doc(db, 'archiveItems', payload.id);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) throw new Error('항목을 찾을 수 없어요.');
+        const adata = snap.data();
+        if(adata.authorUid !== u.uid) throw new Error('본인이 등록한 항목만 수정할 수 있어요.');
+
+        const title = String(payload.title||'').trim() || adata.title;
+        const type = ARCHIVE_TYPES.indexOf(payload.type) >= 0 ? payload.type : adata.type;
+        const desc = payload.desc !== undefined ? String(payload.desc).trim() : adata.desc;
+        const links = Array.isArray(payload.links) ? payload.links.map(l=>String(l||'').trim()).filter(l=>l).slice(0, MAX_LINKS) : (adata.links||[]);
+
+        let uploaded = [];
+        if(payload.files && payload.files.length){
+          const idToken = await u.getIdToken();
+          uploaded = await uploadViaAppsScript_(idToken, payload.files, 'attachment');
+        }
+        const kept = Array.isArray(payload.keepAttachments) ? payload.keepAttachments : (adata.attachments||[]);
+        const attachments = kept.concat(uploaded).slice(0, MAX_ATTACHMENTS);
+        if(!links.length && !attachments.length) throw new Error('링크 또는 파일 중 하나는 꼭 넣어주세요.');
+
+        const updates = { title, type, desc, links, attachments };
+        await updateDoc(ref, updates);
+        return { ok:true, item: toLegacyArchive(payload.id, Object.assign({}, adata, updates)) };
+      }
+
+      case 'deleteArchiveItem': {
+        const u = requireUser_();
+        const ref = doc(db, 'archiveItems', payload.id);
+        const snap = await getDoc(ref);
+        if(snap.exists()){
+          if(snap.data().authorUid !== u.uid) throw new Error('본인이 등록한 항목만 삭제할 수 있어요.');
+          await deleteWhereField_('comments', 'itemId', payload.id);
+          await deleteLikesFor_('아카이브', payload.id);
+          await deleteDoc(ref);
+        }
+        return { ok:true, deletedArchiveId: payload.id };
+      }
+
+      case 'addBoardPost': {
+        const u = requireUser_();
+        const title = String(payload.title||'').trim();
+        const content = String(payload.content||'').trim();
+        if(!title) throw new Error('제목을 입력해주세요.');
+        if(!content) throw new Error('내용을 입력해주세요.');
+        const category = BOARD_CATEGORIES.indexOf(payload.category) >= 0 ? payload.category : BOARD_CATEGORIES[0];
+        const now = nowIso();
+        const data = { authorUid:u.uid, authorEmail:u.email, title, content, category, createdAt: now };
+        const ref = await addDoc(collection(db,'boardPosts'), data);
+        return { ok:true, post: toLegacyBoardPost(ref.id, data) };
+      }
+
+      case 'updateBoardPost': {
+        const u = requireUser_();
+        const ref = doc(db, 'boardPosts', payload.id);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) throw new Error('글을 찾을 수 없어요.');
+        const bdata = snap.data();
+        if(bdata.authorUid !== u.uid) throw new Error('본인이 작성한 글만 수정할 수 있어요.');
+        const title = String(payload.title||'').trim();
+        const content = String(payload.content||'').trim();
+        if(!title) throw new Error('제목을 입력해주세요.');
+        if(!content) throw new Error('내용을 입력해주세요.');
+        const category = BOARD_CATEGORIES.indexOf(payload.category) >= 0 ? payload.category : bdata.category;
+        const now = nowIso();
+        const updates = { title, content, category, editedAt: now };
+        await updateDoc(ref, updates);
+        return { ok:true, post: toLegacyBoardPost(payload.id, Object.assign({}, bdata, updates)) };
+      }
+
+      case 'deleteBoardPost': {
+        const u = requireUser_();
+        const ref = doc(db, 'boardPosts', payload.id);
+        const snap = await getDoc(ref);
+        if(snap.exists()){
+          if(snap.data().authorUid !== u.uid) throw new Error('본인이 작성한 글만 삭제할 수 있어요.');
+          await deleteWhereField_('comments', 'itemId', payload.id);
+          await deleteDoc(ref);
+        }
+        return { ok:true, deletedPostId: payload.id };
+      }
+
+      case 'toggleLike': {
+        const u = requireUser_();
+        const targetType = ['프로젝트','아카이브'].indexOf(payload.targetType) >= 0 ? payload.targetType : '프로젝트';
+        const targetId = String(payload.targetId||'');
+        if(!targetId) throw new Error('대상을 찾을 수 없어요.');
+        const likeId = `${targetType}_${targetId}_${u.uid}`;
+        const ref = doc(db, 'likes', likeId);
+        const snap = await getDoc(ref);
+        if(snap.exists()){
+          await deleteDoc(ref);
+          return { ok:true, added:false, targetType, targetId, email:u.email };
+        } else {
+          await setDoc(ref, { targetType, targetId, authorUid:u.uid, authorEmail:u.email, likedAt: nowIso() });
+          return { ok:true, added:true, targetType, targetId, email:u.email };
+        }
+      }
+
+      case 'incrementArchiveView': {
+        const ref = doc(db, 'archiveItems', payload.id);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) throw new Error('항목을 찾을 수 없어요.');
+        const next = (snap.data().views || 0) + 1;
+        await updateDoc(ref, { views: next });
+        return { ok:true, id: payload.id, views: next };
+      }
+
+      default:
+        return { ok:false, error:'unknown action' };
+    }
+  }catch(err){
+    console.error('fbApiPost failed', action, err);
+    throw (err instanceof Error ? err : new Error(String(err)));
+  }
+}
+
+// 기존 코드 전체가 그대로 부를 수 있도록 전역에 등록 (핵심: 함수 이름·호출 규칙을 안 바꾸는 것)
+window.apiGet = fbApiGet;
+window.apiPost = fbApiPost;
+
+// apiGet/apiPost가 진짜 Firebase 구현으로 교체된 지금에서야 데이터를 불러온다
+// (클래식 스크립트 맨 아래에서 바로 안 부르고 여기서 부르는 이유는 위 주석 참고)
+window.loadAllData();
+
+/* ---- 페이지 로드시 로그인 상태 복원 (기존 initAuth()를 대체) ----
+   최초 1회만 처리하고 구독 해제: 이후 로그인/가입/로그아웃은 각 처리 함수가
+   직접 saveSession/renderUserState를 호출하므로 여기서 다시 손댈 필요가 없음 */
+const unsubscribeInitialAuth = onAuthStateChanged(auth, async (fbUser) => {
+  unsubscribeInitialAuth();
+  try{
+    if(fbUser){
+      const user = await userToLegacyShape_(fbUser);
+      const sessionUser = Object.assign({}, user, { token: fbUser.uid });
+      window.saveSession(sessionUser);
+      window.renderUserState(sessionUser);
+    } else {
+      window.clearSession();
+      window.renderUserState(null);
+    }
+  }catch(e){
+    console.error('initial auth restore failed', e);
+    window.renderUserState(null);
+  }
+});
 </script>
 
 </body>
