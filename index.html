@@ -285,9 +285,9 @@
     font-size:13px;font-weight:500;color:var(--sub);margin:8px 0 14px;min-height:34px;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
   }
-  .p-bar-track{height:8px;border-radius:999px;background:#F0F0F7;overflow:hidden;margin-bottom:6px;}
+  .p-bar-track{height:6px;border-radius:999px;background:#F0F0F7;overflow:hidden;margin-bottom:5px;}
   .p-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--sky));}
-  .p-bottom{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--sub);}
+  .p-bottom{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--sub);}
   .p-bottom .stage{font-weight:700;color:var(--violet);}
 
   /* gallery */
@@ -303,22 +303,22 @@
   }
   .g-card:hover{box-shadow:0 12px 26px rgba(34,34,59,.1);transform:translateY(-3px);}
   .g-thumb{
-    height:130px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;position:relative;
+    height:85px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;position:relative;
     overflow:hidden;
   }
   .g-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
-  .g-thumb.pdf{font-size:15px;font-weight:800;gap:6px;flex-direction:column;}
-  .g-thumb.pdf .pdf-ic{font-size:30px;}
+  .g-thumb.pdf{font-size:12px;font-weight:800;gap:4px;flex-direction:column;}
+  .g-thumb.pdf .pdf-ic{font-size:20px;}
   .g-thumb .heart{
-    position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
+    position:absolute;top:7px;right:7px;width:22px;height:22px;border-radius:50%;
     background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;
-    font-size:14px;cursor:pointer;color:#999;
+    font-size:11px;cursor:pointer;color:#999;
   }
   .g-thumb .heart.liked{color:var(--coral);}
-  .g-body{padding:16px;}
-  .g-tag{font-size:11px;font-weight:800;color:var(--violet);margin-bottom:6px;display:block;}
-  .g-title{font-size:15px;font-weight:700;margin:0 0 6px;}
-  .g-meta{font-size:12.5px;color:var(--sub);display:flex;justify-content:space-between;}
+  .g-body{padding:13px;}
+  .g-tag{font-size:10px;font-weight:800;color:var(--violet);margin-bottom:5px;display:block;}
+  .g-title{font-size:14px;font-weight:700;margin:0 0 5px;}
+  .g-meta{font-size:11.5px;color:var(--sub);display:flex;justify-content:space-between;}
 
   /* goals */
   .goal-list{display:flex;flex-direction:column;gap:14px;}
@@ -493,6 +493,7 @@
   .like-btn .like-icon{width:15px;height:15px;flex-shrink:0;display:block;}
   .like-btn:disabled{opacity:.6;cursor:default;transform:none;}
   .meta-heart{width:12px;height:12px;flex-shrink:0;vertical-align:-1px;margin-right:1px;}
+  .meta-eye{width:12px;height:12px;flex-shrink:0;vertical-align:-1px;margin-right:1px;}
   .modal-divider{border-top:1px solid var(--line);margin:0 28px 20px;}
   .modal-comments{padding:0 28px;}
   .modal-comments h4{font-size:14.5px;font-weight:700;margin:0 0 4px;}
@@ -611,11 +612,11 @@
   .mypage-note b{color:var(--ink);}
 
   .project-card .g-body{display:flex;flex-direction:column;gap:2px;}
-  .project-card .p-bar-track{margin-top:10px;}
-  .project-card .p-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+  .project-card .p-bar-track{margin-top:8px;}
+  .project-card .p-actions{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap;}
   .project-card .p-action-btn{
-    flex:1;min-width:70px;padding:7px 8px;border-radius:999px;border:1.5px solid var(--line);
-    background:#fff;color:var(--sub);font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    flex:1;min-width:60px;padding:6px 7px;border-radius:999px;border:1.5px solid var(--line);
+    background:#fff;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;
     white-space:nowrap;
   }
   .project-card .p-action-btn:hover{border-color:var(--violet);color:var(--violet);}
@@ -1349,6 +1350,11 @@ function heartIconSvg(filled, size, cls){
 function hasAttachOrLink(x){
   return !!((x.links && x.links.length) || (x.attachments && x.attachments.length));
 }
+// 아카이브 조회수 표시용 눈 모양 아이콘
+function eyeIconSvg(size, cls){
+  size = size || 12; cls = cls || 'meta-eye';
+  return `<svg class="${cls}" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"></circle></svg>`;
+}
 // 상세 모달에 링크/첨부파일 버튼들을 여러 개 나란히 렌더링 (다중 링크/파일 지원)
 function linksAttachmentsHtml(item, linkLabel, fileLabel){
   const links = item.links || [];
@@ -1477,47 +1483,90 @@ function likeButtonHtml(targetType, targetId){
     ${heartIconSvg(liked)}<span class="like-count">${count}</span>
   </button>`;
 }
+// 좋아요 버튼은 서버 응답을 기다리지 않고 클릭 즉시 화면부터 바꾸는 낙관적(optimistic) 업데이트로 처리.
+// 같은 대상에 대한 요청이 이미 진행 중이면 중복 클릭을 무시하고, 실패하면 원래 상태로 되돌림.
+const likeInFlight = new Set();
 function wireLikeButton(container, onDone){
   const btn = container.querySelector('.like-btn');
   if(!btn) return;
   btn.addEventListener('click', ()=>{
     const savedUser = getSavedSession();
     if(!savedUser){ openAuthModal(); return; }
-    btn.disabled = true;
-    apiPost('toggleLike', { targetType: btn.dataset.likeType, targetId: btn.dataset.likeId, token: savedUser.token }).then(res=>{
+    const targetType = btn.dataset.likeType, targetId = btn.dataset.likeId;
+    const key = targetType + ':' + targetId;
+    if(likeInFlight.has(key)) return;
+    likeInFlight.add(key);
+
+    const wasLiked = isLikedByMe(targetType, targetId);
+    const myEmail = savedUser.email;
+    applyLikeToggle({ added: !wasLiked, targetType, targetId, email: myEmail });
+    if(typeof onDone === 'function') onDone();
+
+    apiPost('toggleLike', { targetType, targetId, token: savedUser.token }).then(res=>{
       if(res.ok === false) throw new Error(res.error || '알 수 없는 오류');
-      applyLikeToggle(res);
-      if(typeof onDone === 'function') onDone();
+      if(res.added !== !wasLiked){
+        applyLikeToggle(res);
+        if(typeof onDone === 'function') onDone();
+      }
     }).catch(err=>{
       console.error('toggle like failed', err);
-      alert('처리에 실패했어요. 잠시 후 다시 시도해주세요.');
-    }).finally(()=>{ btn.disabled = false; });
+      applyLikeToggle({ added: wasLiked, targetType, targetId, email: myEmail });
+      if(typeof onDone === 'function') onDone();
+    }).finally(()=>{
+      likeInFlight.delete(key);
+    });
   });
 }
 
+/* ---- 초기 데이터 로딩 (localStorage에 캐시해두고, 재방문 시 네트워크 응답을 기다리지 않고
+   즉시 이전 데이터로 먼저 그린 뒤 최신 데이터가 오면 조용히 교체 → 체감 로딩속도 대폭 개선) ---- */
+const DATA_CACHE_KEY = 'px_data_cache_v2';
+
+function applyLoadedData(data){
+  membersData = data.members || [];
+  projectsData = data.projects || [];
+  logsData = data.logs || [];
+  commentsData = data.comments || [];
+  archiveData = data.archive || [];
+  likesData = data.likes || [];
+  if(Array.isArray(data.topics) && data.topics.length) topicsData = data.topics;
+  if(Array.isArray(data.archiveTypes) && data.archiveTypes.length) archiveTypesData = data.archiveTypes;
+}
+function renderAllData(){
+  renderRoster();
+  renderDashboard();
+  renderGallery(document.querySelector('#gallery .fpill.active')?.dataset.f || 'all');
+  if(typeof renderArchive === 'function') renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+  if(currentItemId) renderModal();
+  if(typeof renderMyPage === 'function') renderMyPage(getSavedSession());
+}
+function renderFromCacheIfAny(){
+  try{
+    const cached = JSON.parse(localStorage.getItem(DATA_CACHE_KEY) || 'null');
+    if(!cached) return false;
+    applyLoadedData(cached);
+    renderAllData();
+    return true;
+  }catch(e){ return false; }
+}
+
 function loadAllData(){
+  const hadCache = renderFromCacheIfAny();
   const rosterList = document.getElementById('roster-list');
-  if(rosterList) rosterList.innerHTML = '<p style="font-size:13px;color:var(--sub)">참가자 명단을 불러오는 중...</p>';
-  if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">프로젝트를 불러오는 중...</p>';
+  if(!hadCache){
+    if(rosterList) rosterList.innerHTML = '<p style="font-size:13px;color:var(--sub)">참가자 명단을 불러오는 중...</p>';
+    if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--sub)">프로젝트를 불러오는 중...</p>';
+  }
   return apiGet('').then(data=>{
-    membersData = data.members || [];
-    projectsData = data.projects || [];
-    logsData = data.logs || [];
-    commentsData = data.comments || [];
-    archiveData = data.archive || [];
-    likesData = data.likes || [];
-    if(Array.isArray(data.topics) && data.topics.length) topicsData = data.topics;
-    if(Array.isArray(data.archiveTypes) && data.archiveTypes.length) archiveTypesData = data.archiveTypes;
-    renderRoster();
-    renderDashboard();
-    renderGallery(document.querySelector('#gallery .fpill.active')?.dataset.f || 'all');
-    if(typeof renderArchive === 'function') renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
-    if(currentItemId) renderModal();
-    if(typeof renderMyPage === 'function') renderMyPage(getSavedSession());
+    applyLoadedData(data);
+    try{ localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(data)); }catch(e){}
+    renderAllData();
   }).catch(err=>{
     console.error('initial data load failed', err);
-    if(rosterList) rosterList.innerHTML = '<p style="font-size:13px;color:var(--coral)">명단을 불러오지 못했어요. 새로고침 해주세요.</p>';
-    if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--coral)">프로젝트를 불러오지 못했어요. 새로고침 해주세요.</p>';
+    if(!hadCache){
+      if(rosterList) rosterList.innerHTML = '<p style="font-size:13px;color:var(--coral)">명단을 불러오지 못했어요. 새로고침 해주세요.</p>';
+      if(gWrap) gWrap.innerHTML = '<p style="font-size:13px;color:var(--coral)">프로젝트를 불러오지 못했어요. 새로고침 해주세요.</p>';
+    }
   });
 }
 
@@ -1680,7 +1729,7 @@ function archiveCardHtml(item, idx){
       <div class="g-body">
         <span class="g-tag">#${item.type}${hasAttachOrLink(item) ? ' · 첨부' : ''}</span>
         <p class="g-title">${item.title}</p>
-        <div class="g-meta"><span>${author ? author.name : ''}</span><span>${heartIconSvg(false,12,'meta-heart')} ${getLikeCount('아카이브', item.id)} · 💬 ${getComments(item.id).length}</span></div>
+        <div class="g-meta"><span>${author ? author.name : ''}</span><span>${eyeIconSvg(12,'meta-eye')} ${item.views||0} · ${heartIconSvg(false,12,'meta-heart')} ${getLikeCount('아카이브', item.id)} · 💬 ${getComments(item.id).length}</span></div>
       </div>
     </div>
   `;
@@ -1710,10 +1759,19 @@ document.querySelectorAll('#archive-filters .fpill').forEach(btn=>{
 /* ---- 아카이브 상세보기 (본인 항목은 삭제 가능) ---- */
 const archiveDetailModalBackdrop = document.getElementById('archive-detail-modal-backdrop');
 const archiveDetailContent = document.getElementById('archive-detail-content');
+// 같은 세션(탭)에서 이미 열어본 아카이브 항목은 다시 열어도 조회수를 또 올리지 않음
+const viewedArchiveIds = new Set();
 
 function openArchiveDetail(id){
   const item = archiveData.find(a=>a.id===id);
   if(!item || !archiveDetailModalBackdrop || !archiveDetailContent) return;
+  // 조회수 증가: 화면 반응은 즉시(+1 낙관적 반영), 서버 반영은 백그라운드에서 조용히 처리
+  if(!viewedArchiveIds.has(id)){
+    viewedArchiveIds.add(id);
+    item.views = (item.views || 0) + 1;
+    renderArchive(document.querySelector('#archive-filters .fpill.active')?.dataset.f || 'all');
+    apiPost('incrementArchiveView', { id }).catch(()=>{});
+  }
   const author = membersData.find(m=>m.email===item.email);
   const savedUser = getSavedSession();
   const isMine = savedUser && item.email === savedUser.email;
@@ -1724,10 +1782,11 @@ function openArchiveDetail(id){
       <h3 class="modal-title">${item.title}</h3>
       <div class="modal-meta">
         <div class="avatar" style="background:${avatarColor(0)};overflow:hidden;">${avatarInner(author ? author.photoUrl : '', author ? author.name : '')}</div>
-        <div>
+        <div style="flex:1;">
           <div class="m-author">${author ? author.name : ''}${isMine ? ' (나)' : ''}</div>
           <div class="m-dept">${author ? author.dept : ''}</div>
         </div>
+        <span style="font-size:12px;color:var(--sub);display:inline-flex;align-items:center;gap:3px;">${eyeIconSvg(13,'meta-eye')} 조회 ${item.views||0}</span>
       </div>
       <p class="modal-desc">${item.desc ? escapeHtml(item.desc) : '설명이 없어요.'}</p>
       ${linksAttachmentsHtml(item, '바로가기', '첨부파일 보기')}
@@ -2434,7 +2493,13 @@ function onAuthSuccess(res){
   saveSession(user);
   renderUserState(user);
   closeAuthModal();
-  loadAllData();
+  // 프로젝트/아카이브/댓글/좋아요 등은 로그인 여부와 무관하게 이미 초기 로딩 때 받아뒀으므로
+  // 로그인/가입 성공 후 전체 데이터를 다시 통째로 불러오지 않고, 로컬 상태만 업데이트해서 즉시 반영
+  // (신규 가입이라 참가자 명단에 아직 없다면 방금 가입한 내 정보만 추가)
+  if(user.email && !membersData.some(m=>m.email===user.email)){
+    membersData.push({ email: user.email, name: user.name, phone: user.phone, dept: user.dept, photoUrl: user.photoUrl || '' });
+  }
+  renderAllData();
 }
 
 authLoginForm.addEventListener('submit', (e)=>{
