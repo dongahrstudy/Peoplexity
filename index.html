@@ -591,7 +591,7 @@
     .timeline{grid-template-columns:repeat(2,1fr);}
     .hero p.sub .l2{white-space:normal;}
     .apply-layout{grid-template-columns:1fr;}
-    .roster-card{max-height:320px;}
+    .roster-card:not(.standalone){max-height:320px;}
   }
 
   @media (max-width:640px){
@@ -1486,7 +1486,7 @@ function linksAttachmentsHtml(item, linkLabel, fileLabel){
   return linkHtml + fileHtml;
 }
 
-const COLORS = ["#6C5CE7","#3AC6F0","#00D2A0","#FF6F5E","#FF6FA5","#FFC33C"];
+const COLORS = ["#CF3030","#49DF75","#8E26D9","#D6C651","#26BBD9","#DF499A","#58CF30","#4F49DF","#D96226","#51D6A5","#CA26D9","#BFDF49","#307FCF","#DF4968","#26D935","#8451D6","#D99E26","#49DFD9","#CF30A7","#8DDF49","#2644D9","#D66251","#26D971","#B449DF","#CECF30","#49B3DF","#D92670","#62D651","#4526D9","#DF8E49","#30CFA8","#DF49D8","#9CD926","#5183D6","#D92634","#49DF69","#8030CF","#DFC049","#26C9D9","#D651A4","#61D926","#494EDF","#CF5930","#49DF9B","#BC26D9","#C5D651","#268DD9","#DF4974","#30CF31","#7649DF","#D99026","#51D6C7","#D926BA","#99DF49","#3057CF","#DF5049","#26D963","#A651D6","#D9CB26","#49BEDF","#CF307E","#67DF49","#3726D9","#D68451","#26D99F","#DA49DF","#A6CF30","#498CDF","#D92642","#51D663","#7226D9","#DFB549","#30CDCF","#DF49B2","#6FD926","#5161D6","#D94626","#49DF8F","#A930CF","#D7DF49","#269BD9","#D65182","#33D926","#6A49DF","#CF8130","#49DFC1","#D926C8","#A3D651","#2660D9","#DF494D","#30CF5A","#9C49DF","#D9BD26","#51C4D6","#D9268C","#73DF49","#3230CF","#DF7749","#26D991","#C751D6"];
 function avatarColor(i){return COLORS[i % COLORS.length];}
 // 프로필 사진이 있으면 사진을, 없으면 이름 이니셜을 반환 (아바타 div/span의 내부 콘텐츠로 사용)
 function avatarInner(photoUrl, name){
