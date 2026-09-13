@@ -1272,7 +1272,10 @@
           <button type="button" class="add-step" id="project-add-step-btn">+ 단계 추가</button>
         </div>
         <div class="field">
-          <label class="checkbox-row"><input type="checkbox" id="project-completed"> 이미 완료한 프로젝트예요 (진행률 100%로 등록)</label>
+          <label class="field-label" for="project-progress">진행률 <span id="project-progress-label" style="font-weight:800;color:var(--violet);">0%</span></label>
+          <input type="range" id="project-progress" min="0" max="100" step="5" value="0">
+          <p class="apply-note" style="margin:2px 0 0;">슬라이더를 움직여서 진행률을 자유롭게 올리거나 낮출 수 있어요.</p>
+          <label class="checkbox-row" style="margin-top:6px;"><input type="checkbox" id="project-completed"> 이미 완료한 프로젝트예요 (진행률 100%로 등록)</label>
         </div>
         <div class="field">
           <label class="field-label">링크 (선택 · 결과물 URL · 최대 5개)</label>
@@ -2676,6 +2679,20 @@ function addProjectStepRow(text, done){
 }
 document.getElementById('project-add-step-btn').addEventListener('click', ()=>addProjectStepRow('', false));
 
+const projectProgressInput = document.getElementById('project-progress');
+const projectProgressLabel = document.getElementById('project-progress-label');
+const projectCompletedCheckbox = document.getElementById('project-completed');
+projectProgressInput.addEventListener('input', ()=>{
+  projectProgressLabel.textContent = projectProgressInput.value + '%';
+  projectCompletedCheckbox.checked = Number(projectProgressInput.value) >= 100;
+});
+projectCompletedCheckbox.addEventListener('change', ()=>{
+  if(projectCompletedCheckbox.checked){
+    projectProgressInput.value = 100;
+    projectProgressLabel.textContent = '100%';
+  }
+});
+
 function openProjectModal(projectId){
   const user = getSavedSession();
   if(!user){ openAuthModal('login'); return; }
@@ -2689,6 +2706,9 @@ function openProjectModal(projectId){
   document.getElementById('project-title').value = editing ? editing.title : '';
   document.getElementById('project-goal').value = editing ? (editing.goal||'') : '';
   document.getElementById('project-completed').checked = editing ? (editing.progress >= 100) : false;
+  const initProgress = editing ? (editing.progress || 0) : 0;
+  document.getElementById('project-progress').value = initProgress;
+  document.getElementById('project-progress-label').textContent = initProgress + '%';
   populateTopicSelect();
   if(editing) document.getElementById('project-topic').value = editing.topic || topicsData[0];
 
@@ -2727,6 +2747,7 @@ document.getElementById('project-form').addEventListener('submit', (e)=>{
   const files = projectAttachManager.getNewFiles();
   const keepAttachments = projectAttachManager.getKeptAttachments();
   const completed = document.getElementById('project-completed').checked;
+  const progress = completed ? 100 : Number(document.getElementById('project-progress').value);
 
   const btn = document.getElementById('project-submit-btn');
   btn.disabled = true;
@@ -2735,7 +2756,7 @@ document.getElementById('project-form').addEventListener('submit', (e)=>{
   msg.textContent = files.length ? '파일을 업로드하고 있어요. 잠시만 기다려주세요...' : '';
 
   const action = editingProjectId ? 'updateProjectInfo' : 'createProject';
-  const payload = { title, topic, goal, steps, links, files, completed, token: user.token };
+  const payload = { title, topic, goal, steps, links, files, completed, progress, token: user.token };
   if(editingProjectId){
     payload.projectId = editingProjectId;
     payload.keepAttachments = keepAttachments;
@@ -3426,7 +3447,8 @@ async function fbApiPost(action, payload){
           const idToken = await u.getIdToken();
           attachments = await uploadViaAppsScript_(idToken, payload.files, 'attachment');
         }
-        const progress = payload.completed ? 100 : 0;
+        let progress = payload.completed ? 100 : (Number(payload.progress) || 0);
+        progress = Math.max(0, Math.min(100, Math.round(progress)));
         if(payload.completed) steps = steps.map(s=>Object.assign({}, s, {done:true}));
         const now = nowIso();
         const data = { authorUid:u.uid, authorEmail:u.email, title, topic, goal, steps, progress, createdAt:now, updatedAt:now, links, attachments };
@@ -3447,7 +3469,9 @@ async function fbApiPost(action, payload){
         const goal = payload.goal !== undefined ? String(payload.goal).trim() : pdata.goal;
         const links = Array.isArray(payload.links) ? payload.links.map(l=>String(l||'').trim()).filter(l=>l).slice(0, MAX_LINKS) : (pdata.links||[]);
         let steps = Array.isArray(payload.steps) ? payload.steps.map(s=>({text:String(s.text||'').trim(), done:!!s.done})).filter(s=>s.text) : (pdata.steps||[]);
-        let progress = pdata.progress || 0;
+        let progress = payload.progress !== undefined ? Number(payload.progress) : (pdata.progress || 0);
+        if(isNaN(progress)) progress = pdata.progress || 0;
+        progress = Math.max(0, Math.min(100, Math.round(progress)));
         if(payload.completed){ progress = 100; steps = steps.map(s=>Object.assign({}, s, {done:true})); }
 
         let uploaded = [];
