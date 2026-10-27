@@ -129,15 +129,17 @@
   .g-card{
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;
     transition:box-shadow .15s ease, transform .15s ease;
+    display:flex;flex-direction:column;
   }
   .g-card:hover{box-shadow:0 12px 26px rgba(34,34,59,.1);}
-  .g-body{padding:16px;}
+  .g-body{padding:16px;display:flex;flex-direction:column;flex:1;}
   .g-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
   .g-tag{font-size:10px;font-weight:800;color:var(--violet);background:#EFEBFF;padding:3px 9px;border-radius:999px;display:inline-block;}
   .g-rank{font-size:11px;font-weight:800;color:#8A5B00;background:#FFF6E0;padding:3px 9px;border-radius:999px;flex-shrink:0;}
   .g-title{font-size:15px;font-weight:700;margin:4px 0 4px;cursor:pointer;}
   .g-title:hover{color:var(--violet);}
   .g-author{font-size:12px;color:var(--sub);font-weight:600;margin-bottom:12px;}
+  .g-bottom{margin-top:auto;}
 
   .g-avg-row{display:flex;align-items:baseline;gap:8px;margin-bottom:12px;}
   .g-avg-score{font-size:22px;font-weight:800;font-family:var(--font-display);color:var(--ink);}
@@ -147,14 +149,19 @@
   .g-avg-locked{font-size:12px;color:var(--sub);font-weight:600;}
 
   .star-rate{display:inline-flex;gap:3px;}
-  .star-rate .star{
-    width:26px;height:26px;cursor:pointer;color:#E2E1EE;transition:color .08s, transform .08s;flex-shrink:0;
+  .star-wrap{position:relative;display:inline-block;flex-shrink:0;}
+  .star-wrap svg{position:absolute;top:0;left:0;display:block;pointer-events:none;}
+  .star-wrap .star-base{color:#E2E1EE;}
+  .star-wrap .star-fill{color:var(--amber);}
+  .star-fill-clip{position:absolute;top:0;left:0;height:100%;overflow:hidden;pointer-events:none;}
+  .star-hit{
+    position:absolute;top:0;height:100%;width:50%;background:transparent;border:none;padding:0;margin:0;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
   }
-  .star-rate .star:hover{transform:scale(1.12);}
-  .star-rate.disabled .star{cursor:default;opacity:.45;}
-  .star-rate.disabled .star:hover{transform:none;}
-  .star-rate .star.on{color:var(--amber);}
-  .star-rate .star.preview{color:#FFE2A6;}
+  .star-hit.half{left:0;}
+  .star-hit.full{left:50%;}
+  .star-rate.disabled .star-hit{display:none;cursor:default;}
+  .star-rate.disabled .star-wrap .star-fill{color:#C9C7DC;}
 
   .my-rate-row{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line);gap:10px;}
   .my-rate-label{font-size:11.5px;color:var(--sub);font-weight:700;}
@@ -207,7 +214,7 @@
 
   .rating-breakdown{display:flex;flex-direction:column;gap:6px;margin:16px 0;}
   .rb-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);font-weight:600;}
-  .rb-row .rb-label{width:34px;flex-shrink:0;}
+  .rb-row .rb-label{width:38px;flex-shrink:0;}
   .rb-track{flex:1;height:7px;border-radius:999px;background:var(--line);overflow:hidden;}
   .rb-fill{height:100%;background:var(--amber);border-radius:999px;}
   .rb-row .rb-count{width:28px;text-align:right;flex-shrink:0;}
@@ -271,7 +278,7 @@
   <div class="blob blob3"></div>
   <div class="hero-inner">
     <span class="badge-pill">⭐ 우수작 선정 · 프로젝트 별점 투표</span>
-    <h1>참가자들의 프로젝트에<br><span class="hl">별점(1~5점)</span>으로 투표해보세요</h1>
+    <h1>참가자들의 프로젝트에<br><span class="hl">별점</span>으로 투표해보세요</h1>
     <p class="sub">영화 리뷰처럼, 마음에 드는 프로젝트에 별점을 남겨보세요. 본인이 등록한 프로젝트에는 투표할 수 없고, 투표가 진행되는 동안 합산 결과는 관리자만 볼 수 있어요.</p>
     <div class="hero-stats">
       <div class="hstat"><div class="lbl">프로젝트 수</div><div class="num" id="stat-projects">-</div></div>
@@ -287,7 +294,7 @@
       <div>
         <span class="tag">VOTE</span>
         <h2>프로젝트에 별점 남기기</h2>
-        <p>별을 눌러 1~5점을 남길 수 있고, 다시 누르면 내 별점을 바꿀 수 있어요. 본인이 등록한 프로젝트는 투표 대상에서 제외돼요.</p>
+        <p>별의 왼쪽 반을 누르면 0.5점, 오른쪽 반을 누르면 1점 단위로 평가돼요 (0.5~5점). 다시 누르면 내 별점을 바꿀 수 있고, 본인이 등록한 프로젝트는 투표 대상에서 제외돼요.</p>
       </div>
     </div>
     <div id="filters"></div>
@@ -432,29 +439,48 @@ function setMyScoreFor(projectId, score){
   saveRatings();
 }
 
-/* ==================== 별 아이콘 ==================== */
-function starSvg(i, filled){
-  return `<svg class="star${filled ? ' on' : ''}" data-score="${i}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+/* ==================== 별 아이콘 (0.5점 단위 반개 별점 지원) ==================== */
+const STAR_PATH = 'M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z';
+
+function formatScore(score){
+  return Number.isInteger(score) ? String(score) : score.toFixed(1);
+}
+
+// i번째 별(1~5)의 채움 비율(0~1) — score가 3.5면 1,2,3번째 별은 100%, 4번째 별은 50%, 5번째는 0%
+function starFillFrac(i, score){
+  return Math.max(0, Math.min(1, score - (i - 1)));
+}
+
+function starWrapHtml(i, score, size, interactive){
+  const pct = starFillFrac(i, score) * 100;
+  const iconStyle = `width:${size}px;height:${size}px;`;
+  const base = `<svg class="star-base" style="${iconStyle}" viewBox="0 0 24 24" fill="currentColor"><path d="${STAR_PATH}"/></svg>`;
+  const fill = `<svg class="star-fill" style="${iconStyle}" viewBox="0 0 24 24" fill="currentColor"><path d="${STAR_PATH}"/></svg>`;
+  const hits = interactive ? `
+    <button type="button" class="star-hit half" data-value="${i - 0.5}" tabindex="-1" aria-label="${i - 0.5}점"></button>
+    <button type="button" class="star-hit full" data-value="${i}" tabindex="-1" aria-label="${i}점"></button>
+  ` : '';
+  return `<span class="star-wrap" style="width:${size}px;height:${size}px;">${base}<span class="star-fill-clip" style="width:${pct}%">${fill}</span>${hits}</span>`;
 }
 function starRateHtml(projectId, score, size){
   size = size || 26;
-  let html = `<div class="star-rate" data-project-id="${projectId}" style="--s:${size}px">`;
-  for(let i=1;i<=5;i++){
-    html += starSvg(i, i<=score);
-  }
+  let html = `<div class="star-rate" data-project-id="${projectId}">`;
+  for(let i=1;i<=5;i++) html += starWrapHtml(i, score, size, true);
   html += `</div>`;
   return html;
 }
-function avgStarsHtml(avg){
-  const rounded = Math.round(avg);
-  let html = '';
-  for(let i=1;i<=5;i++) html += (i<=rounded ? '★' : '☆');
+// 읽기 전용 별점 표시 (평균 점수 등) — 0.5점 단위까지 정확히 반영
+function avgStarsHtml(avg, size){
+  size = size || 15;
+  let html = `<span class="star-rate disabled" style="vertical-align:-3px;">`;
+  for(let i=1;i<=5;i++) html += starWrapHtml(i, avg, size, false);
+  html += `</span>`;
   return html;
 }
 function disabledStarRateHtml(size){
   size = size || 26;
-  let html = `<div class="star-rate disabled" style="--s:${size}px">`;
-  for(let i=1;i<=5;i++) html += starSvg(i, false);
+  let html = `<div class="star-rate disabled">`;
+  for(let i=1;i<=5;i++) html += starWrapHtml(i, 0, size, false);
   html += `</div>`;
   return html;
 }
@@ -477,9 +503,9 @@ function myRateRowHtml(p, size){
   let rightLabel;
   if(myScore){
     const rank = myRankFor(p.id);
-    rightLabel = `<span class="my-rate-done">내 별점 ${myScore}점${rank && rank.total > 1 ? ` · 내 랭킹 ${rank.rank}위` : ''}</span>`;
+    rightLabel = `<span class="my-rate-done">내 별점 ${formatScore(myScore)}점${rank && rank.total > 1 ? ` · 내 랭킹 ${rank.rank}위` : ''}</span>`;
   } else {
-    rightLabel = `<span class="my-rate-label">${currentUser ? '별을 눌러 평가' : '로그인하고 평가하기'}</span>`;
+    rightLabel = `<span class="my-rate-label">${currentUser ? '별 반쪽을 누르면 0.5점 단위로 평가' : '로그인하고 평가하기'}</span>`;
   }
   return `<div class="my-rate-row">${starRateHtml(p.id, myScore, size)}${rightLabel}</div>`;
 }
@@ -601,7 +627,7 @@ onAuthStateChanged(auth, (user)=>{
     const p = projectsData.find(pp=>pp.id===projectId);
     if(p && !isOwnProject(p)){
       setMyScoreFor(projectId, score);
-      showToast(`★ ${score}점을 남겼어요`);
+      showToast(`★ ${formatScore(score)}점을 남겼어요`);
       renderGrid();
       if(currentDetailId === projectId) openDetail(projectId);
     }
@@ -690,8 +716,10 @@ function projectCardHtml(p){
         </div>
         <p class="g-title" data-open-detail="${p.id}">${escapeHtml(p.title)}</p>
         <div class="g-author">${author ? escapeHtml(author.name) + (author.dept ? ' · '+escapeHtml(author.dept) : '') : ''}</div>
-        ${aggregateRowHtml(p)}
-        ${inAdminView() ? '' : myRateRowHtml(p, 22)}
+        <div class="g-bottom">
+          ${aggregateRowHtml(p)}
+          ${inAdminView() ? '' : myRateRowHtml(p, 22)}
+        </div>
       </div>
     </div>
   `;
@@ -742,19 +770,18 @@ function bindCardEvents(){
 
 function bindStarRate(el, projectId, isDetail){
   if(!el || el.classList.contains('disabled')) return;
-  const stars = el.querySelectorAll('.star');
-  stars.forEach(star=>{
-    star.addEventListener('mouseenter', ()=>{
-      const score = Number(star.dataset.score);
-      stars.forEach(s=>{
-        s.classList.toggle('preview', Number(s.dataset.score) <= score && !s.classList.contains('on'));
-      });
+  const wraps = Array.from(el.querySelectorAll('.star-wrap'));
+  function paint(score){
+    wraps.forEach((wrap, idx)=>{
+      const i = idx + 1;
+      wrap.querySelector('.star-fill-clip').style.width = (starFillFrac(i, score) * 100) + '%';
     });
-    star.addEventListener('mouseleave', ()=>{
-      stars.forEach(s=>s.classList.remove('preview'));
-    });
-    star.addEventListener('click', ()=>{
-      const score = Number(star.dataset.score);
+  }
+  const committed = getMyScoreFor(projectId); // 미리보기 끝나면 돌아갈 실제 점수
+  el.querySelectorAll('.star-hit').forEach(btn=>{
+    btn.addEventListener('mouseenter', ()=> paint(Number(btn.dataset.value)));
+    btn.addEventListener('click', ()=>{
+      const score = Number(btn.dataset.value); // 왼쪽 반쪽=x.5점, 오른쪽 반쪽=x점
       const p = projectsData.find(pp=>pp.id===projectId);
       if(p && isOwnProject(p)){
         showToast('✋ 본인이 등록한 프로젝트에는 투표할 수 없어요');
@@ -766,11 +793,12 @@ function bindStarRate(el, projectId, isDetail){
         return;
       }
       setMyScoreFor(projectId, score);
-      showToast(`★ ${score}점을 남겼어요`);
+      showToast(`★ ${formatScore(score)}점을 남겼어요`);
       renderGrid();
       if(isDetail || currentDetailId === projectId) openDetail(projectId);
     });
   });
+  el.addEventListener('mouseleave', ()=> paint(committed));
 }
 
 /* ==================== 상세보기 모달 ==================== */
@@ -779,13 +807,17 @@ const detailModalBackdrop = document.getElementById('detail-modal-backdrop');
 const detailModalContent = document.getElementById('detail-modal-content');
 function ratingBreakdownHtml(projectId){
   const votes = Object.values(getVotesFor(projectId));
-  const counts = [0,0,0,0,0];
-  votes.forEach(v=>{ if(v>=1 && v<=5) counts[v-1]++; });
+  const counts = new Array(10).fill(0); // idx 0 = 0.5점 ... idx 9 = 5점 (0.5점 단위 10단계)
+  votes.forEach(v=>{
+    const idx = Math.round(v * 2) - 1;
+    if(idx >= 0 && idx < 10) counts[idx]++;
+  });
   const max = Math.max(1, ...counts);
   let html = '<div class="rating-breakdown">';
-  for(let s=5;s>=1;s--){
-    const c = counts[s-1];
-    html += `<div class="rb-row"><span class="rb-label">${s}점</span><div class="rb-track"><div class="rb-fill" style="width:${(c/max*100)}%"></div></div><span class="rb-count">${c}</span></div>`;
+  for(let idx=9; idx>=0; idx--){
+    const score = (idx + 1) / 2;
+    const c = counts[idx];
+    html += `<div class="rb-row"><span class="rb-label">${formatScore(score)}점</span><div class="rb-track"><div class="rb-fill" style="width:${(c/max*100)}%"></div></div><span class="rb-count">${c}</span></div>`;
   }
   html += '</div>';
   return html;
